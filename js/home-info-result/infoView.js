@@ -173,6 +173,7 @@ function decreaseResource(index) {
 
 function resetResources() {
   gameState.allocations = [0, 0, 0];
+  gameState.used = 0;
   rerenderInfoView();
 }
 
@@ -252,6 +253,9 @@ function bindInfoEvents() {
   }
 
   document.addEventListener("keydown", handleEscClose);
+  document.addEventListener("game:reset-resource", () => {
+    resetResources();
+  });
 }
 
 function handleEscClose(event) {
