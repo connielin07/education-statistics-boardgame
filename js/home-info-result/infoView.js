@@ -1,3 +1,5 @@
+import { state as globalState } from '../shared/stateStore.js';
+
 const gameState = {
   round: 1,
   totalRounds: 3,
@@ -259,5 +261,8 @@ function handleEscClose(event) {
 }
 
 export function renderInfoView() {
+  gameState.round = globalState.currentRound; 
+  gameState.points = globalState.totalScore; // 同步分數
+
   rerenderInfoView();
 }
