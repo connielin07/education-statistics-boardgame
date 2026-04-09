@@ -88,5 +88,3 @@ export function renderResultView(customState = resultState) {
   root.innerHTML = createResultMarkup(customState);
   bindResultEvents();
 }
-
-renderResultView();

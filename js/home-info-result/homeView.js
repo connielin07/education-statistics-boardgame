@@ -115,5 +115,3 @@ export function renderHomeView() {
   root.innerHTML = homeMarkup;
   bindHomeEvents();
 }
-
-renderHomeView();

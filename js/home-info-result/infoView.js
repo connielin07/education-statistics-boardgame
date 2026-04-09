@@ -261,5 +261,3 @@ function handleEscClose(event) {
 export function renderInfoView() {
   rerenderInfoView();
 }
-
-renderInfoView();
