@@ -1,0 +1,36 @@
+.home-screen {
+  min-height: 960px;
+  display: grid;
+  place-items: center;
+}
+
+.home-screen__content {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-8);
+  text-align: center;
+}
+
+.home-screen h1 {
+  max-width: 1240px;
+  font-size: clamp(2.8rem, 6vw, 6.25rem);
+  font-weight: 900;
+  line-height: 1.12;
+}
+
+.home-screen__subtitle {
+  font-size: clamp(1.5rem, 3vw, 3.5rem);
+  color: var(--text-soft);
+}
+
+.home-screen__actions {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.action-button--primary {
+  min-width: 346px;
+  min-height: 78px;
+  padding: 0 var(--space-8);
+  font-size: clamp(2rem, 3vw, 3.25rem);
+}

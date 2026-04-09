@@ -56,6 +56,7 @@ button {
 
 .action-button--primary,
 .action-button--panel,
+.action-button--result,
 .dropdown-button,
 .round-badge {
   background: var(--panel-fill);
@@ -63,6 +64,7 @@ button {
 }
 
 .screen,
-.school-card {
+.school-card,
+.result-card {
   background: var(--screen-bg);
 }

@@ -20,6 +20,14 @@
 - 主內容區左側是三張等寬學校卡，右側是 `RESET` 與 `FINISH` 兩顆垂直按鈕。
 - 學校卡保留標題列與內文區，作為後續學校資料與效果欄位的容器。
 
+## Result Screen
+
+- 結果頁使用單一置中的直式卡片。
+- 卡片頂部為 `Final Score`，下方以水平分隔線切開。
+- 中段顯示 `Calculate :` 與每回合得分明細。
+- `Total : 22` 以較粗字重獨立強調。
+- 底部左側是大型等級字母，右側是垂直排列的 `HOME` 與 `RESTART`。
+
 ## Style Rules
 
 - 全頁背景使用白底加極淡藍灰底色。
@@ -37,7 +45,7 @@
 ## File Scope
 
 - [`/Users/lin/education-statistics-boardgame/index.html`](/Users/lin/education-statistics-boardgame/index.html)
-  目前同時放首頁與遊戲頁的版面參考。
+  目前放首頁、遊戲頁、結果頁三個掛載點與對應資源引用。
 - [`/Users/lin/education-statistics-boardgame/assets/styles/base/reset.css`](/Users/lin/education-statistics-boardgame/assets/styles/base/reset.css)
   提供基本 reset。
 - [`/Users/lin/education-statistics-boardgame/assets/styles/base/base.css`](/Users/lin/education-statistics-boardgame/assets/styles/base/base.css)
@@ -46,3 +54,7 @@
   定義首頁與遊戲頁的主要版面。
 - [`/Users/lin/education-statistics-boardgame/assets/styles/screen-ui-structure/skeleton.css`](/Users/lin/education-statistics-boardgame/assets/styles/screen-ui-structure/skeleton.css)
   補上外框、卡片邊線與 RWD 行為。
+- [`/Users/lin/education-statistics-boardgame/assets/styles/home-info-result/result.css`](/Users/lin/education-statistics-boardgame/assets/styles/home-info-result/result.css)
+  結果頁專用版型。
+- [`/Users/lin/education-statistics-boardgame/js/home-info-result/resultView.js`](/Users/lin/education-statistics-boardgame/js/home-info-result/resultView.js)
+  產生結果頁 DOM。
