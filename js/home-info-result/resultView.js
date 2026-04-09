@@ -1,41 +1,92 @@
-const resultMarkup = `
-  <section class="result-screen" aria-labelledby="result-title">
-    <div class="result-card">
-      <header class="result-card__header">
-        <h2 id="result-title">Final Score</h2>
-      </header>
+const resultState = {
+  roundScores: [7, 10, 5],
+  finalScore: 22,
+};
 
-      <div class="result-card__body">
-        <section class="result-summary" aria-labelledby="result-calculate-title">
-          <h3 id="result-calculate-title">Calculate :</h3>
-          <div class="result-rounds">
-            <p>Round 1 : +7</p>
-            <p>Round 2 : +10</p>
-            <p>Round 3 : +5</p>
-          </div>
-          <p class="result-total">Total : 22</p>
-        </section>
+function getGrade(score) {
+  if (score >= 20) return "A";
+  if (score >= 15) return "B";
+  return "C";
+}
 
-        <section class="result-outcome" aria-label="結果操作區">
-          <div class="grade-mark" aria-label="等級">A</div>
-          <div class="result-actions">
-            <button class="action-button action-button--result" type="button">HOME</button>
-            <button class="action-button action-button--result" type="button">RESTART</button>
+function getComment(score) {
+  if (score >= 20) return "資源調度成效良好";
+  if (score >= 15) return "整體校務支持大致穩定";
+  return "資源配置仍有改善空間";
+}
+
+function createResultMarkup(state) {
+  const grade = getGrade(state.finalScore);
+  const comment = getComment(state.finalScore);
+
+  return `
+    <section class="screen result-screen" aria-labelledby="result-title">
+      <div class="result-card">
+        <h2 id="result-title" class="result-card__title">Final Score</h2>
+
+        <div class="result-card__content">
+          <h3 class="result-card__subtitle">Calculate :</h3>
+
+          <div class="result-card__rounds">
+            <p>Round 1 : +${state.roundScores[0]}</p>
+            <p>Round 2 : +${state.roundScores[1]}</p>
+            <p>Round 3 : +${state.roundScores[2]}</p>
           </div>
-        </section>
+
+          <p class="result-card__total">Total : ${state.finalScore}</p>
+          <p class="result-card__comment">${comment}</p>
+
+          <div class="result-card__bottom">
+            <div class="result-card__grade">${grade}</div>
+
+            <div class="result-card__actions">
+              <button
+                id="homeBtn"
+                class="action-button action-button--primary"
+                type="button"
+              >
+                HOME
+              </button>
+
+              <button
+                id="restartBtn"
+                class="action-button action-button--primary"
+                type="button"
+              >
+                RESTART
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-  </section>
-`;
+    </section>
+  `;
+}
 
-export function renderResultView() {
-  const root = document.querySelector("#result-screen-root");
+function bindResultEvents() {
+  const homeBtn = document.getElementById("homeBtn");
+  const restartBtn = document.getElementById("restartBtn");
 
-  if (!root) {
-    return;
+  if (homeBtn) {
+    homeBtn.addEventListener("click", () => {
+      document.dispatchEvent(new CustomEvent("game:go-home"));
+    });
   }
 
-  root.innerHTML = resultMarkup;
+  if (restartBtn) {
+    restartBtn.addEventListener("click", () => {
+      document.dispatchEvent(new CustomEvent("game:restart"));
+    });
+  }
+}
+
+export function renderResultView(customState = resultState) {
+  const root = document.querySelector("#result-screen-root");
+
+  if (!root) return;
+
+  root.innerHTML = createResultMarkup(customState);
+  bindResultEvents();
 }
 
 renderResultView();
