@@ -33,15 +33,15 @@ function createGameMarkup(state) {
         <p class="status-points">POINTS : ${state.points}</p>
         <p class="status-used">USED: ${state.used} / ${state.maxResource}</p>
 
-        <button id="eventBtn" class="dropdown-button" type="button" aria-expanded="false">
+        <button
+          id="eventBtn"
+          class="dropdown-button"
+          type="button"
+          aria-haspopup="dialog"
+        >
           <span>EVENT</span>
           <span class="dropdown-button__arrow">▼</span>
         </button>
-      </div>
-
-      <div id="eventPanel" class="event-panel" hidden>
-        <h3 class="event-panel__title">${state.eventTitle}</h3>
-        <p class="event-panel__desc">${state.eventDescription}</p>
       </div>
 
       <div class="resource-strip" aria-label="資源調整列">
@@ -107,6 +107,28 @@ function createGameMarkup(state) {
           <button id="finishBtn" class="action-button action-button--panel" type="button">FINISH →</button>
         </aside>
       </div>
+
+      <div id="eventModal" class="event-modal" hidden>
+        <div class="event-modal__backdrop"></div>
+
+        <div
+          class="event-modal__card"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="eventModalTitle"
+        >
+          <h3 id="eventModalTitle" class="event-modal__title">${state.eventTitle}</h3>
+          <p class="event-modal__desc">${state.eventDescription}</p>
+
+          <button
+            id="closeEventBtn"
+            class="action-button action-button--primary"
+            type="button"
+          >
+            CLOSE
+          </button>
+        </div>
+      </div>
     </section>
   `;
 }
@@ -152,17 +174,18 @@ function resetResources() {
   rerenderInfoView();
 }
 
-function toggleEventPanel() {
-  const eventPanel = document.getElementById("eventPanel");
-  const eventBtn = document.getElementById("eventBtn");
+function openEventModal() {
+  const modal = document.getElementById("eventModal");
+  if (!modal) return;
 
-  if (!eventPanel || !eventBtn) {
-    return;
-  }
+  modal.hidden = false;
+}
 
-  const isHidden = eventPanel.hidden;
-  eventPanel.hidden = !isHidden;
-  eventBtn.setAttribute("aria-expanded", String(isHidden));
+function closeEventModal() {
+  const modal = document.getElementById("eventModal");
+  if (!modal) return;
+
+  modal.hidden = true;
 }
 
 function handleFinish() {
@@ -189,6 +212,8 @@ function bindInfoEvents() {
   const resetBtn = document.getElementById("resetBtn");
   const finishBtn = document.getElementById("finishBtn");
   const eventBtn = document.getElementById("eventBtn");
+  const closeEventBtn = document.getElementById("closeEventBtn");
+  const backdrop = document.querySelector(".event-modal__backdrop");
 
   plusButtons.forEach((button) => {
     button.addEventListener("click", () => {
@@ -213,7 +238,23 @@ function bindInfoEvents() {
   }
 
   if (eventBtn) {
-    eventBtn.addEventListener("click", toggleEventPanel);
+    eventBtn.addEventListener("click", openEventModal);
+  }
+
+  if (closeEventBtn) {
+    closeEventBtn.addEventListener("click", closeEventModal);
+  }
+
+  if (backdrop) {
+    backdrop.addEventListener("click", closeEventModal);
+  }
+
+  document.addEventListener("keydown", handleEscClose);
+}
+
+function handleEscClose(event) {
+  if (event.key === "Escape") {
+    closeEventModal();
   }
 }
 

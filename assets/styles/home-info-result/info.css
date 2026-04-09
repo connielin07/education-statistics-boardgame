@@ -139,3 +139,49 @@
   padding: 0 1.25rem;
   font-size: clamp(2.1rem, 2.7vw, 3rem);
 }
+.event-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+}
+
+.event-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.event-modal__card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(90vw, 420px);
+  background: var(--screen-bg);
+  border: 2px solid var(--screen-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-soft);
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  text-align: center;
+}
+
+.event-modal__title {
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 0;
+}
+
+.event-modal__desc {
+  font-size: 1.15rem;
+  line-height: 1.6;
+  color: var(--text-soft);
+  margin: 0;
+}
+
+.event-modal__card .action-button {
+  align-self: center;
+  min-width: 160px;
+}
