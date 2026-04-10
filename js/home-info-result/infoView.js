@@ -1,5 +1,3 @@
-import { state as globalState } from '../shared/stateStore.js';
-
 const gameState = {
   round: 1,
   totalRounds: 3,
@@ -46,6 +44,10 @@ function createGameMarkup(state) {
         </button>
       </div>
 
+      <div class="game-hint-row">
+        <div class="game-hint">${getHintText(state)}</div>
+      </div>
+
       <div class="resource-strip" aria-label="資源調整列">
         <div class="resource-counter">
           <button type="button" class="minus-btn" data-index="0" aria-label="減少資源一">−</button>
@@ -65,8 +67,6 @@ function createGameMarkup(state) {
           <button type="button" class="plus-btn" data-index="2" aria-label="增加資源三">+</button>
         </div>
       </div>
-
-      <p class="game-hint">${getHintText(state)}</p>
 
       <div class="game-screen__body">
         <main class="school-grid" aria-label="學校卡片區">
@@ -142,9 +142,7 @@ function updateUsedResource() {
 function rerenderInfoView() {
   const root = document.querySelector("#game-screen-root");
 
-  if (!root) {
-    return;
-  }
+  if (!root) return;
 
   updateUsedResource();
   root.innerHTML = createGameMarkup(gameState);
@@ -173,21 +171,18 @@ function decreaseResource(index) {
 
 function resetResources() {
   gameState.allocations = [0, 0, 0];
-  gameState.used = 0;
   rerenderInfoView();
 }
 
 function openEventModal() {
   const modal = document.getElementById("eventModal");
   if (!modal) return;
-
   modal.hidden = false;
 }
 
 function closeEventModal() {
   const modal = document.getElementById("eventModal");
   if (!modal) return;
-
   modal.hidden = true;
 }
 
@@ -207,6 +202,12 @@ function handleFinish() {
       },
     })
   );
+}
+
+function handleEscClose(event) {
+  if (event.key === "Escape") {
+    closeEventModal();
+  }
 }
 
 function bindInfoEvents() {
@@ -253,20 +254,10 @@ function bindInfoEvents() {
   }
 
   document.addEventListener("keydown", handleEscClose);
-  document.addEventListener("game:reset-resource", () => {
-    resetResources();
-  });
-}
-
-function handleEscClose(event) {
-  if (event.key === "Escape") {
-    closeEventModal();
-  }
 }
 
 export function renderInfoView() {
-  gameState.round = globalState.currentRound; 
-  gameState.points = globalState.totalScore; // 同步分數
-
   rerenderInfoView();
 }
+
+renderInfoView();

@@ -41,7 +41,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   align-items: center;
-  padding: 36px 48px 12px;
+  padding: 36px 48px 8px;
   column-gap: 24px;
 }
 
@@ -69,10 +69,29 @@
   font-weight: 800;
 }
 
-/* ===== 資源列：和下面三張卡牌完全同一組寬度 ===== */
+/* ===== 提示：直接在 USED 正下方 ===== */
+.game-hint-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  align-items: center;
+  padding: 0 48px 10px;
+  column-gap: 24px;
+}
+
+.game-hint {
+  grid-column: 2;
+  justify-self: center;
+  text-align: center;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--text-soft);
+  line-height: 1.4;
+}
+
+/* ===== 資源列：在提示下面 ===== */
 .resource-strip {
   width: calc(100% - 48px - 48px - 240px - 40px);
-  margin: 8px 0 0 48px;
+  margin: 0 0 24px 48px;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 36px;
@@ -107,20 +126,6 @@
   font-weight: 900;
   line-height: 1;
   color: var(--text-main);
-}
-
-/* ===== 提示：只對齊中間那張卡牌 ===== */
-.game-hint {
-  width: calc((100% - 48px - 48px - 240px - 40px - 72px) / 3);
-  margin-left: calc(
-    48px + ((100% - 48px - 48px - 240px - 40px - 72px) / 3) + 36px
-  );
-  margin-top: 10px;
-  margin-bottom: 28px;
-  text-align: center;
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: var(--text-soft);
 }
 
 /* ===== 主內容區 ===== */
