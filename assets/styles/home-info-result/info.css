@@ -1,6 +1,6 @@
 .game-screen {
   width: 100%;
-  max-width: 1520px;
+  max-width: 1500px;
   margin: 0 auto;
   background: var(--screen-bg);
   border: 2px solid var(--screen-border);
@@ -8,6 +8,7 @@
   box-sizing: border-box;
 }
 
+/* ===== 上方標題列 ===== */
 .game-screen__topbar {
   display: flex;
   justify-content: space-between;
@@ -26,8 +27,8 @@
 }
 
 .round-badge {
-  min-width: 330px;
-  min-height: 84px;
+  min-width: 300px;
+  min-height: 80px;
   display: inline-flex;
   justify-content: center;
   align-items: center;
@@ -35,19 +36,19 @@
   font-weight: 900;
 }
 
+/* ===== 狀態列 ===== */
 .game-screen__statusbar {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  align-items: start;
+  align-items: center;
   padding: 36px 48px 12px;
   column-gap: 24px;
 }
 
 .status-points {
   margin: 0;
-  font-size: 2.2rem;
+  font-size: 2rem;
   font-weight: 900;
-  align-self: center;
   justify-self: start;
 }
 
@@ -55,7 +56,6 @@
   margin: 0;
   font-size: 4rem;
   font-weight: 900;
-  line-height: 1.1;
   text-align: center;
   justify-self: center;
 }
@@ -63,23 +63,27 @@
 .dropdown-button {
   justify-self: end;
   align-self: center;
-  min-width: 230px;
-  min-height: 68px;
+  min-width: 220px;
+  min-height: 64px;
   font-size: 2rem;
   font-weight: 800;
 }
 
+/* ===== 資源列：和下面三張卡牌完全同一組寬度 ===== */
 .resource-strip {
+  width: calc(100% - 48px - 48px - 240px - 40px);
+  margin: 8px 0 0 48px;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 36px;
   align-items: center;
   justify-items: center;
-  padding: 0 48px;
-  margin-top: 8px;
 }
 
 .resource-counter {
+  width: 100%;
   display: flex;
+  justify-content: center;
   align-items: center;
   gap: 28px;
 }
@@ -92,11 +96,12 @@
   line-height: 1;
   cursor: pointer;
   color: var(--text-main);
+  padding: 0;
 }
 
 .resource-counter strong {
   display: inline-block;
-  min-width: 48px;
+  min-width: 44px;
   text-align: center;
   font-size: 4.5rem;
   font-weight: 900;
@@ -104,14 +109,21 @@
   color: var(--text-main);
 }
 
+/* ===== 提示：只對齊中間那張卡牌 ===== */
 .game-hint {
-  margin: 12px 0 28px;
+  width: calc((100% - 48px - 48px - 240px - 40px - 72px) / 3);
+  margin-left: calc(
+    48px + ((100% - 48px - 48px - 240px - 40px - 72px) / 3) + 36px
+  );
+  margin-top: 10px;
+  margin-bottom: 28px;
   text-align: center;
   font-size: 1.2rem;
   font-weight: 700;
   color: var(--text-soft);
 }
 
+/* ===== 主內容區 ===== */
 .game-screen__body {
   display: grid;
   grid-template-columns: 1fr 240px;
@@ -120,6 +132,7 @@
   align-items: start;
 }
 
+/* ===== 三張卡牌 ===== */
 .school-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -127,7 +140,7 @@
 }
 
 .school-card {
-  min-height: 740px;
+  min-height: 680px;
   border: 2px solid var(--card-border);
   border-radius: 12px;
   overflow: hidden;
@@ -137,7 +150,7 @@
 .school-card__header {
   padding: 28px 32px;
   border-bottom: 2px solid var(--line-main);
-  font-size: 2.6rem;
+  font-size: 2.4rem;
   font-weight: 900;
   color: var(--text-main);
 }
@@ -147,28 +160,32 @@
 }
 
 .school-card__body p {
-  margin: 0 0 34px;
-  font-size: 1.15rem;
+  margin: 0 0 30px;
+  font-size: 1.2rem;
   line-height: 1.6;
   color: var(--text-main);
 }
 
+.school-card__body p:last-child {
+  margin-bottom: 0;
+}
+
+/* ===== 右側按鈕 ===== */
 .side-actions {
   display: flex;
   flex-direction: column;
-  justify-content: center;
   gap: 34px;
-  padding-top: 130px;
+  padding-top: 140px;
 }
 
 .side-actions .action-button {
-  min-height: 116px;
+  min-height: 110px;
   font-size: 2.4rem;
   font-weight: 900;
   justify-content: center;
 }
 
-/* ===== Event Modal 保留你之前做的置中圖卡 ===== */
+/* ===== Event Modal ===== */
 .event-modal {
   position: fixed;
   inset: 0;
