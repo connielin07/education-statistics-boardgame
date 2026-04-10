@@ -16,6 +16,7 @@
   font-size: clamp(2.8rem, 6vw, 6.25rem);
   font-weight: 900;
   line-height: 1.12;
+  white-space: nowrap;
 }
 
 .home-screen__subtitle {
