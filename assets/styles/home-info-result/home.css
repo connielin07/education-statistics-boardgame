@@ -7,7 +7,7 @@
 .home-screen__content {
   display: grid;
   justify-items: center;
-  gap: var(--space-8);
+  gap: var(--space-5); /* 原本是 var(--space-8)，改小一點 */
   text-align: center;
 }
 
@@ -17,16 +17,19 @@
   font-weight: 900;
   line-height: 1.12;
   white-space: nowrap;
+  margin: 0; /* 補這行，避免 h1 預設外距 */
 }
 
 .home-screen__subtitle {
   font-size: clamp(1.5rem, 3vw, 3.5rem);
   color: var(--text-soft);
+  margin: 0; /* 補這行，避免 p 預設外距 */
 }
 
 .home-screen__actions {
   display: grid;
-  gap: var(--space-6);
+  gap: var(--space-4); /* 按鈕彼此也可再近一點 */
+  margin-top: 60px;
 }
 
 .action-button--primary {

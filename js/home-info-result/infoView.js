@@ -1,3 +1,5 @@
+import { renderResultView } from "./resultView.js";
+
 const gameState = {
   round: 1,
   totalRounds: 3,
@@ -186,22 +188,37 @@ function closeEventModal() {
   modal.hidden = true;
 }
 
+function goToResultScreen() {
+  const homeRoot = document.querySelector("#home-screen-root");
+  const gameRoot = document.querySelector("#game-screen-root");
+  const resultRoot = document.querySelector("#result-screen-root");
+
+  if (homeRoot) homeRoot.style.display = "none";
+  if (gameRoot) gameRoot.style.display = "none";
+  if (resultRoot) resultRoot.style.display = "block";
+
+  renderResultView();
+}
+
 function handleFinish() {
-  if (gameState.used < gameState.maxResource) {
-    alert("請先分配完 3 點資源。");
+  updateUsedResource();
+
+  if (gameState.used !== gameState.maxResource) {
+    alert("請先剛好分配完 3 點資源。");
     return;
   }
 
-  document.dispatchEvent(
-    new CustomEvent("game:finish-round", {
-      detail: {
-        round: gameState.round,
-        points: gameState.points,
-        used: gameState.used,
-        allocations: [...gameState.allocations],
-      },
-    })
-  );
+  // 第 1、2 回合：進下一回合
+  if (gameState.round < gameState.totalRounds) {
+    gameState.round += 1;
+    gameState.allocations = [0, 0, 0];
+    gameState.used = 0;
+    rerenderInfoView();
+    return;
+  }
+
+  // 第 3 回合：跳到結算頁
+  goToResultScreen();
 }
 
 function handleEscClose(event) {
