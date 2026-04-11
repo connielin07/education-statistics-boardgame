@@ -1,3 +1,5 @@
+import { gameState, renderInfoView } from "./infoView.js";
+
 const resultState = {
   roundScores: [7, 10, 5],
   finalScore: 22,
@@ -63,19 +65,49 @@ function createResultMarkup(state) {
   `;
 }
 
+function resetGameState() {
+  gameState.round = 1;
+  gameState.points = 10;
+  gameState.used = 0;
+  gameState.allocations = [0, 0, 0];
+}
+
 function bindResultEvents() {
   const homeBtn = document.getElementById("homeBtn");
   const restartBtn = document.getElementById("restartBtn");
 
   if (homeBtn) {
     homeBtn.addEventListener("click", () => {
-      document.dispatchEvent(new CustomEvent("game:go-home"));
+      // 1. 重設狀態
+      resetGameState();
+
+      // 2. 切回首頁
+      const homeRoot = document.querySelector("#home-screen-root");
+      const gameRoot = document.querySelector("#game-screen-root");
+      const resultRoot = document.querySelector("#result-screen-root");
+
+      if (homeRoot) homeRoot.style.display = "block";
+      if (gameRoot) gameRoot.style.display = "none";
+      if (resultRoot) resultRoot.style.display = "none";
     });
   }
 
   if (restartBtn) {
     restartBtn.addEventListener("click", () => {
-      document.dispatchEvent(new CustomEvent("game:restart"));
+      // 1. 重設遊戲狀態
+      resetGameState();
+
+      // 2. 切回遊戲頁
+      const homeRoot = document.querySelector("#home-screen-root");
+      const gameRoot = document.querySelector("#game-screen-root");
+      const resultRoot = document.querySelector("#result-screen-root");
+
+      if (homeRoot) homeRoot.style.display = "none";
+      if (gameRoot) gameRoot.style.display = "block";
+      if (resultRoot) resultRoot.style.display = "none";
+
+      // 3. 重新 render 第一回合
+      renderInfoView();
     });
   }
 }

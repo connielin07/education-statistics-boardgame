@@ -1,3 +1,5 @@
+import { gameState, renderInfoView } from "./infoView.js";
+
 const homeMarkup = `
   <section class="screen home-screen" aria-labelledby="home-title">
     <div class="home-screen__content">
@@ -58,6 +60,23 @@ const homeMarkup = `
   </section>
 `;
 
+function resetGameState() {
+  gameState.round = 1;
+  gameState.points = 10;
+  gameState.used = 0;
+  gameState.allocations = [0, 0, 0];
+}
+
+function goToGameScreen() {
+  const homeRoot = document.querySelector("#home-screen-root");
+  const gameRoot = document.querySelector("#game-screen-root");
+  const resultRoot = document.querySelector("#result-screen-root");
+
+  if (homeRoot) homeRoot.style.display = "none";
+  if (gameRoot) gameRoot.style.display = "block";
+  if (resultRoot) resultRoot.style.display = "none";
+}
+
 function openRulesModal() {
   const rulesModal = document.getElementById("rulesModal");
   if (!rulesModal) return;
@@ -83,7 +102,14 @@ function bindHomeEvents() {
 
   if (startBtn) {
     startBtn.addEventListener("click", () => {
-      document.dispatchEvent(new CustomEvent("game:start"));
+      // 1. 重設狀態
+      resetGameState();
+
+      // 2. 切到遊戲頁
+      goToGameScreen();
+
+      // 3. 重新 render 第一回合
+      renderInfoView();
     });
   }
 

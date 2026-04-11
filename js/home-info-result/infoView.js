@@ -1,6 +1,6 @@
 import { renderResultView } from "./resultView.js";
 
-const gameState = {
+export const gameState = {
   round: 1,
   totalRounds: 3,
   points: 10,
