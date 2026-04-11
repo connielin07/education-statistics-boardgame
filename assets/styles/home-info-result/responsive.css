@@ -1,173 +1,3 @@
-/* 手機橫式：直接提示改成直式 */
-.rotate-hint {
-  display: none;
-}
-
-@media (max-width: 768px) and (orientation: landscape) {
-  .rotate-hint {
-    display: flex;
-    position: fixed;
-    inset: 0;
-    z-index: 9999;
-    background: rgba(17, 17, 17, 0.92);
-    color: #fff;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    padding: 24px;
-    font-size: 1.25rem;
-    font-weight: 800;
-    line-height: 1.7;
-  }
-
-  body > *:not(.rotate-hint) {
-    display: none !important;
-  }
-}
-
-@media (max-width: 768px) {
-  .desktop-only {
-    display: none !important;
-  }
-
-  .mobile-only {
-    display: block;
-  }
-
-  .game-screen__topbar {
-    padding: 16px 16px 12px;
-  }
-
-  .game-screen__topbar h2 {
-    max-width: 56%;
-    font-size: 1.9rem;
-    line-height: 1.2;
-  }
-
-  .round-badge {
-    min-width: 128px;
-    padding: 10px 14px;
-    font-size: 1.1rem;
-    border-radius: 10px;
-  }
-
-  .game-screen__statusbar {
-    grid-template-columns: 110px 1fr;
-    grid-template-areas:
-      "points used"
-      "event hint";
-    gap: 10px 14px;
-    padding: 14px 16px 8px;
-    align-items: center;
-  }
-
-  .status-points {
-    grid-area: points;
-    font-size: 1.15rem;
-    align-self: start;
-  }
-
-  .status-center {
-    grid-area: used;
-    justify-items: center;
-    gap: 6px;
-  }
-
-  .status-used {
-    font-size: 2rem;
-    line-height: 1.1;
-  }
-
-  .game-hint {
-    font-size: 0.95rem;
-    line-height: 1.5;
-    text-align: center;
-  }
-
-  .dropdown-button {
-    grid-area: event;
-    justify-self: start;
-    min-width: 110px;
-    height: 42px;
-    font-size: 1rem;
-    padding: 0 14px;
-  }
-
-  .mobile-control-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    align-items: center;
-    padding: 8px 16px 14px;
-  }
-
-  .mobile-resource-counter {
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    gap: 14px;
-  }
-
-  .mobile-resource-counter strong {
-    font-size: 2.7rem;
-  }
-
-  .mobile-side-actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
-
-  .mobile-side-actions .action-button--panel {
-    min-height: 56px;
-    font-size: 1.1rem;
-    border-radius: 10px;
-  }
-
-  .game-screen__body {
-    display: block;
-    padding: 0 0 18px;
-  }
-
-  .school-grid {
-    display: flex;
-    overflow-x: auto;
-    gap: 14px;
-    padding: 0 16px;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .school-grid::-webkit-scrollbar {
-    display: none;
-  }
-
-  .school-grid {
-    scrollbar-width: none;
-  }
-
-  .school-card {
-    min-width: calc(100vw - 32px);
-    min-height: 520px;
-    flex: 0 0 auto;
-    scroll-snap-align: start;
-    border-radius: 18px;
-  }
-
-  .school-card__header {
-    font-size: 1.9rem;
-    padding: 18px 20px;
-  }
-
-  .school-card__body {
-    padding: 20px;
-  }
-
-  .school-card__body p {
-    font-size: 1.15rem;
-    margin-bottom: 16px;
-  }
-}
 .rwd-hint {
   position: fixed;
   inset: 0;
@@ -208,9 +38,389 @@
   color: #5f6f8e;
 }
 
-/* 桌機不顯示 */
+/* 桌機完全不動 */
+.mobile-only {
+  display: none !important;
+}
+
 @media (min-width: 769px) {
   .rwd-hint {
     display: none !important;
   }
+}
+
+/* 手機橫式：提醒改直式 */
+@media (max-width: 768px) and (orientation: landscape) {  .prototype-board,
+  .screen,
+  .home-screen,
+  .game-screen,
+  .result-screen {
+    width: 100%;
+    max-width: 100%;
+    min-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .game-screen {
+    overflow-x: hidden;
+  }
+  .rwd-hint {
+    display: block !important;
+  }
+
+  .prototype-board {
+    display: none !important;
+  }
+}
+
+/* 手機直式 */
+@media (max-width: 768px) and (orientation: portrait) {
+  .desktop-only {
+    display: none !important;
+  }
+
+  .mobile-only {
+    display: block !important;
+  }
+
+  .prototype-board {
+    width: 100%;
+    max-width: 430px;
+    margin: 0 auto;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  #home-screen-root,
+  #game-screen-root,
+  #result-screen-root,
+  .home-screen,
+  .game-screen,
+  .result-screen,
+  .screen {
+    width: 100%;
+    max-width: 100%;
+    min-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .game-screen {
+    overflow-x: hidden;
+  }
+
+  .game-screen__topbar {
+    padding: 14px 16px 10px;
+  }
+
+  .game-screen__topbar {
+  padding: 14px 16px 10px;
+  gap: 12px;
+}
+
+.game-screen__topbar h2 {
+  flex: 1;
+  min-width: 0;
+  max-width: none;
+  font-size: 1.55rem;
+  line-height: 1.2;
+  word-break: break-word;
+  white-space: normal;
+}
+
+.round-badge {
+  flex-shrink: 0;
+  min-width: 108px;
+  padding: 10px 10px;
+  font-size: 0.95rem;
+  border-radius: 10px;
+}
+
+  .game-screen__statusbar {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    grid-template-areas:
+      "points used"
+      "event hint";
+    gap: 8px 16px;
+    align-items: start;
+    padding: 14px 16px 6px;
+  }
+
+  .mobile-points-event {
+    display: grid;
+    gap: 10px;
+    align-content: start;
+  }
+
+  .status-points {
+    margin: 0;
+    font-size: 1.15rem;
+  }
+
+  .status-center {
+    justify-items: center;
+    gap: 6px;
+  }
+
+  .status-used {
+    margin: 0;
+    font-size: 2rem;
+    line-height: 1.08;
+  }
+
+  .game-hint {
+    font-size: 0.95rem;
+    line-height: 1.45;
+    text-align: center;
+  }
+
+  .mobile-points-event .dropdown-button {
+    justify-self: start;
+    min-width: 106px;
+    height: 42px;
+    padding: 0 14px;
+    font-size: 1rem;
+  }
+
+  .mobile-control-row {
+    display: grid !important;
+    grid-template-columns: auto 1fr;
+    gap: 14px;
+    align-items: center;
+    padding: 10px 16px 12px;
+  }
+
+  .mobile-resource-counter {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .mobile-counter-btn {
+    width: 42px;
+    height: 42px;
+    border: none;
+    background: transparent;
+    color: #2f3a50;
+    font-size: 2.2rem;
+    font-weight: 900;
+  }
+
+  .mobile-resource-counter strong {
+    min-width: 30px;
+    text-align: center;
+    font-size: 2.8rem;
+    font-weight: 900;
+    color: #2f3a50;
+  }
+
+  .mobile-side-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .mobile-side-actions .action-button--panel {
+    min-height: 56px;
+    padding: 0 12px;
+    border-radius: 10px;
+    font-size: 1.05rem;
+  }
+
+  .game-screen__body {
+    display: block;
+    width: 100%;
+    padding: 0 0 18px;
+    box-sizing: border-box;
+  }
+
+  .school-grid {
+    width: 100%;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    gap: 14px;
+    padding: 0 16px 12px;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    box-sizing: border-box;
+  }
+
+  .school-grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .school-grid {
+    scrollbar-width: none;
+  }
+
+  .school-card {
+    flex: 0 0 calc(100% - 32px) !important;
+    width: calc(100% - 32px) !important;
+    min-width: calc(100% - 32px) !important;
+    max-width: calc(100% - 32px) !important;
+    min-height: 520px;
+    scroll-snap-align: start;
+    border-radius: 18px;
+    box-sizing: border-box;
+  }
+
+  .school-card__header {
+    font-size: 1.8rem;
+    padding: 18px 20px;
+  }
+
+  .school-card__body {
+    padding: 20px;
+  }
+
+  .school-card__body p {
+    font-size: 1.08rem;
+    margin-bottom: 16px;
+    line-height: 1.6;
+  }
+}
+@media (max-width: 768px) and (orientation: portrait) {
+  /* 整體先防止橫向爆版 */
+  html,
+  body {
+    overflow-x: hidden;
+  }
+
+  .prototype-board,
+  #home-screen-root,
+  #game-screen-root,
+  #result-screen-root,
+  .screen,
+  .home-screen,
+  .result-screen {
+    width: 100%;
+    max-width: 100%;
+    min-width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* =========================
+     首頁修正
+     ========================= */
+  .home-screen {
+    min-height: auto;
+    padding: 20px 16px 28px;
+    box-sizing: border-box;
+  }
+
+  .home-screen__content {
+    width: 100%;
+    max-width: 100%;
+    gap: 20px;
+    box-sizing: border-box;
+  }
+
+  .home-screen h1 {
+    max-width: 100%;
+    font-size: 2.15rem !important;
+    line-height: 1.2 !important;
+    white-space: normal !important;
+    word-break: break-word;
+    text-align: center;
+    margin: 0;
+  }
+
+  .home-screen__subtitle {
+    max-width: 100%;
+    font-size: 1.15rem !important;
+    line-height: 1.5;
+    text-align: center;
+    word-break: break-word;
+    margin: 0;
+  }
+
+  .home-screen__actions {
+    width: 100%;
+    gap: 12px;
+    justify-items: center;
+  }
+
+  .action-button--primary {
+    width: 100%;
+    max-width: 260px;
+    min-width: 0 !important;
+    min-height: 56px !important;
+    padding: 0 16px !important;
+    font-size: 1.1rem !important;
+    box-sizing: border-box;
+  }
+
+    /* =========================
+     尾頁修正（手機版維持桌機版畫面感）
+     ========================= */
+  .result-screen {
+    min-height: auto;
+    padding: 20px 16px 28px;
+    box-sizing: border-box;
+  }
+
+  .result-card {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    padding: 20px 16px;
+    box-sizing: border-box;
+  }
+
+  .result-card__title {
+    margin: 0 0 16px;
+    font-size: 2.2rem !important;
+    line-height: 1.15;
+    text-align: center;
+    white-space: normal;
+    word-break: break-word;
+  }
+
+  .result-card__subtitle {
+    font-size: 1.15rem !important;
+    margin-bottom: 12px;
+  }
+
+  .result-card__rounds p,
+  .result-card__total,
+  .result-card__comment {
+    font-size: 1.2rem !important;
+    line-height: 1.6;
+    word-break: break-word;
+  }
+  .result-card__total {
+  font-size: 1.4rem !important;
+  font-weight: 600;
+}
+
+  /* 手機版尾頁：維持和桌機一樣，左邊等第、右邊按鈕 */
+  .result-card__bottom {
+  display: flex !important;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+  .result-card__grade {
+  font-size: 5.2rem !important;
+  line-height: 1;
+  margin-top: 8px;
+}
+
+  .result-card__actions {
+  width: 100%;
+  display: flex !important;
+  flex-direction: column;
+  align-items: flex-end;  /* 👉 關鍵 */
+  gap: 10px;
+}
+
+  .result-card__actions .action-button {
+  width: 160px;           /* 固定寬度比較像設計稿 */
+  min-height: 44px !important;
+  font-size: 0.95rem !important;
+}
 }

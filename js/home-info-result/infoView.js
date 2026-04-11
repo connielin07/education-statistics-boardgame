@@ -10,6 +10,7 @@ export const gameState = {
   eventTitle: "交通不便加劇",
   eventDescription: "特偏或極偏學校若未獲資源，本回合 -2 分。",
   currentSchools: [],
+  activeCardIndex: 0,
 };
 
 function getHintText(state) {
@@ -21,7 +22,7 @@ function getHintText(state) {
     return `提示：尚有 ${state.maxResource - state.used} 點資源未分配完成。`;
   }
 
-  return "提示：分配完成，請按 FINISH。";
+  return "提示：資源已分配完成，可按 FINISH。";
 }
 
 function formatRate(rate) {
@@ -47,27 +48,39 @@ function ensureCurrentSchools() {
 
 function resetCurrentSchoolsForNextRound() {
   gameState.currentSchools = getRandomSchools(schoolData, 3);
+  gameState.activeCardIndex = 0;
 }
 
-function createSchoolCardMarkup(school) {
+function createSchoolCardMarkup(school, index) {
   return `
-    <article class="school-card">
+    <article class="school-card" data-card-index="${index}">
       <header class="school-card__header">${school.school_name}</header>
       <div class="school-card__body">
         <p>地區：${school.region}</p>
         <p>偏遠級別：${school.remote_area_level}</p>
-        <p>111學年學生數：${school.count_111}</p>
-        <p>113學年學生數：${school.count_113}</p>
-        <p>學生規模變動率：${formatRate(school.change_rate)}</p>
-        <p>分類結果：${school.change_category}</p>
-        <p>中位比較：${formatMedianText(school.is_below_median)}</p>
+        <p>規模變動分類：${school.change_category}</p>
+        <p>規模變動率：${formatRate(school.change_rate)}</p>
+        <p>規模變動中位：${formatMedianText(school.is_below_median)}</p>
       </div>
     </article>
   `;
 }
 
+function createDesktopResourceCounter(index) {
+  return `
+    <div class="resource-counter">
+      <button type="button" class="minus-btn" data-index="${index}" aria-label="減少資源">−</button>
+      <strong>${gameState.allocations[index]}</strong>
+      <button type="button" class="plus-btn" data-index="${index}" aria-label="增加資源">+</button>
+    </div>
+  `;
+}
+
 function createGameMarkup(state) {
   ensureCurrentSchools();
+
+  const activeIndex = state.activeCardIndex;
+  const activeValue = state.allocations[activeIndex] ?? 0;
 
   return `
     <section class="screen game-screen" aria-labelledby="game-title">
@@ -77,52 +90,81 @@ function createGameMarkup(state) {
       </header>
 
       <div class="game-screen__statusbar">
-        <p class="status-points">POINTS : ${state.points}</p>
-        <p class="status-used">USED: ${state.used} / ${state.maxResource}</p>
+        <div class="mobile-points-event">
+          <p class="status-points">POINTS : ${state.points}</p>
 
-        <button
-          id="eventBtn"
-          class="dropdown-button"
-          type="button"
-          aria-haspopup="dialog"
-        >
-          <span>EVENT</span>
-          <span class="dropdown-button__arrow">▼</span>
-        </button>
-      </div>
-
-      <div class="game-hint-row">
-        <div class="game-hint">${getHintText(state)}</div>
-      </div>
-
-      <div class="resource-strip" aria-label="資源調整列">
-        <div class="resource-counter">
-          <button type="button" class="minus-btn" data-index="0" aria-label="減少資源一">−</button>
-          <strong>${state.allocations[0]}</strong>
-          <button type="button" class="plus-btn" data-index="0" aria-label="增加資源一">+</button>
+          <button
+            id="eventBtn"
+            class="dropdown-button"
+            type="button"
+            aria-haspopup="dialog"
+          >
+            <span>EVENT</span>
+            <span class="dropdown-button__arrow">▼</span>
+          </button>
         </div>
 
-        <div class="resource-counter">
-          <button type="button" class="minus-btn" data-index="1" aria-label="減少資源二">−</button>
-          <strong>${state.allocations[1]}</strong>
-          <button type="button" class="plus-btn" data-index="1" aria-label="增加資源二">+</button>
+        <div class="status-center">
+          <p class="status-used">USED: ${state.used} / ${state.maxResource}</p>
+          <p class="game-hint">${getHintText(state)}</p>
         </div>
 
-        <div class="resource-counter">
-          <button type="button" class="minus-btn" data-index="2" aria-label="減少資源三">−</button>
-          <strong>${state.allocations[2]}</strong>
-          <button type="button" class="plus-btn" data-index="2" aria-label="增加資源三">+</button>
+        <div class="desktop-event-holder desktop-only">
+          <button
+            id="eventBtnDesktop"
+            class="dropdown-button"
+            type="button"
+            aria-haspopup="dialog"
+          >
+            <span>EVENT</span>
+            <span class="dropdown-button__arrow">▼</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 桌機 -->
+      <div class="resource-strip desktop-only" aria-label="資源調整列">
+        ${createDesktopResourceCounter(0)}
+        ${createDesktopResourceCounter(1)}
+        ${createDesktopResourceCounter(2)}
+      </div>
+
+      <!-- 手機 -->
+      <div class="mobile-control-row mobile-only">
+        <div class="mobile-resource-counter">
+          <button
+            type="button"
+            class="minus-btn mobile-counter-btn"
+            data-mobile="true"
+            aria-label="減少目前卡片資源"
+          >
+            −
+          </button>
+          <strong id="mobileAllocationValue">${activeValue}</strong>
+          <button
+            type="button"
+            class="plus-btn mobile-counter-btn"
+            data-mobile="true"
+            aria-label="增加目前卡片資源"
+          >
+            +
+          </button>
+        </div>
+
+        <div class="mobile-side-actions">
+          <button class="action-button action-button--panel reset-btn" type="button">RESET ↻</button>
+          <button class="action-button action-button--panel finish-btn" type="button">FINISH →</button>
         </div>
       </div>
 
       <div class="game-screen__body">
         <main class="school-grid" aria-label="學校卡片區">
-          ${state.currentSchools.map(createSchoolCardMarkup).join("")}
+          ${state.currentSchools.map((school, index) => createSchoolCardMarkup(school, index)).join("")}
         </main>
 
-        <aside class="side-actions" aria-label="遊戲操作">
-          <button id="resetBtn" class="action-button action-button--panel" type="button">RESET ↻</button>
-          <button id="finishBtn" class="action-button action-button--panel" type="button">FINISH →</button>
+        <aside class="side-actions desktop-only" aria-label="遊戲操作">
+          <button id="resetBtn" class="action-button action-button--panel reset-btn" type="button">RESET ↻</button>
+          <button id="finishBtn" class="action-button action-button--panel finish-btn" type="button">FINISH →</button>
         </aside>
       </div>
 
@@ -162,6 +204,18 @@ function rerenderInfoView() {
   updateUsedResource();
   root.innerHTML = createGameMarkup(gameState);
   bindInfoEvents();
+
+  requestAnimationFrame(() => {
+    restoreMobileCardPosition();
+    syncMobileCounter();
+  });
+}
+
+function getButtonTargetIndex(button) {
+  if (button.dataset.mobile === "true") {
+    return gameState.activeCardIndex;
+  }
+  return Number(button.dataset.index);
 }
 
 function increaseResource(index) {
@@ -231,41 +285,99 @@ function handleEscClose(event) {
   }
 }
 
+function syncMobileCounter() {
+  const mobileValue = document.getElementById("mobileAllocationValue");
+  if (!mobileValue) return;
+  mobileValue.textContent = String(gameState.allocations[gameState.activeCardIndex] ?? 0);
+}
+
+function bindMobileCardScroll() {
+  const schoolGrid = document.querySelector(".school-grid");
+  if (!schoolGrid) return;
+
+  let scrollTimer;
+
+  schoolGrid.addEventListener("scroll", () => {
+    if (window.innerWidth > 768) return;
+
+    clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(() => {
+      const cards = schoolGrid.querySelectorAll(".school-card");
+      if (!cards.length) return;
+
+      let closestIndex = 0;
+      let closestDistance = Infinity;
+
+      cards.forEach((card, index) => {
+        const distance = Math.abs(card.offsetLeft - schoolGrid.scrollLeft);
+        if (distance < closestDistance) {
+          closestDistance = distance;
+          closestIndex = index;
+        }
+      });
+
+      gameState.activeCardIndex = closestIndex;
+      syncMobileCounter();
+    }, 50);
+  });
+}
+
+function restoreMobileCardPosition() {
+  if (window.innerWidth > 768) return;
+
+  const schoolGrid = document.querySelector(".school-grid");
+  const cards = schoolGrid?.querySelectorAll(".school-card");
+  if (!schoolGrid || !cards || !cards.length) return;
+
+  const activeCard = cards[gameState.activeCardIndex];
+  if (!activeCard) return;
+
+  schoolGrid.scrollTo({
+    left: activeCard.offsetLeft,
+    behavior: "auto",
+  });
+}
+
 let hasBoundEscListener = false;
 
 function bindInfoEvents() {
   const plusButtons = document.querySelectorAll(".plus-btn");
   const minusButtons = document.querySelectorAll(".minus-btn");
-  const resetBtn = document.getElementById("resetBtn");
-  const finishBtn = document.getElementById("finishBtn");
+  const resetButtons = document.querySelectorAll(".reset-btn");
+  const finishButtons = document.querySelectorAll(".finish-btn");
   const eventBtn = document.getElementById("eventBtn");
+  const eventBtnDesktop = document.getElementById("eventBtnDesktop");
   const closeEventBtn = document.getElementById("closeEventBtn");
   const backdrop = document.querySelector(".event-modal__backdrop");
 
   plusButtons.forEach((button) => {
     button.addEventListener("click", () => {
-      const index = Number(button.dataset.index);
+      const index = getButtonTargetIndex(button);
       increaseResource(index);
     });
   });
 
   minusButtons.forEach((button) => {
     button.addEventListener("click", () => {
-      const index = Number(button.dataset.index);
+      const index = getButtonTargetIndex(button);
       decreaseResource(index);
     });
   });
 
-  if (resetBtn) {
-    resetBtn.addEventListener("click", resetResources);
-  }
+  resetButtons.forEach((button) => {
+    button.addEventListener("click", resetResources);
+  });
 
-  if (finishBtn) {
-    finishBtn.addEventListener("click", handleFinish);
-  }
+  finishButtons.forEach((button) => {
+    button.addEventListener("click", handleFinish);
+  });
 
   if (eventBtn) {
     eventBtn.addEventListener("click", openEventModal);
+  }
+
+  if (eventBtnDesktop) {
+    eventBtnDesktop.addEventListener("click", openEventModal);
   }
 
   if (closeEventBtn) {
@@ -275,6 +387,8 @@ function bindInfoEvents() {
   if (backdrop) {
     backdrop.addEventListener("click", closeEventModal);
   }
+
+  bindMobileCardScroll();
 
   if (!hasBoundEscListener) {
     document.addEventListener("keydown", handleEscClose);
