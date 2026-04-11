@@ -1,9 +1,5 @@
-import { gameState, renderInfoView } from "./infoView.js";
-
-const resultState = {
-  roundScores: [7, 10, 5],
-  finalScore: 22,
-};
+import { renderInfoView, gameState } from "./infoView.js";
+import { state } from "../shared/stateStore.js";
 
 function getGrade(score) {
   if (score >= 20) return "A";
@@ -17,9 +13,33 @@ function getComment(score) {
   return "資源配置仍有改善空間";
 }
 
-function createResultMarkup(state) {
-  const grade = getGrade(state.finalScore);
-  const comment = getComment(state.finalScore);
+function getRoundScores() {
+  const history = Array.isArray(state.allocationHistory) ? state.allocationHistory : [];
+
+  return [0, 1, 2].map((index) => {
+    const item = history[index];
+    if (!item) return "-";
+
+    if (typeof item.roundScore === "number") return item.roundScore;
+    if (typeof item.score === "number") return item.score;
+    if (typeof item.pointsEarned === "number") return item.pointsEarned;
+
+    return "-";
+  });
+}
+
+function getFinalScore() {
+  if (typeof state.totalScore === "number") {
+    return state.totalScore;
+  }
+  return 10;
+}
+
+function createResultMarkup() {
+  const roundScores = getRoundScores();
+  const finalScore = getFinalScore();
+  const grade = getGrade(finalScore);
+  const comment = getComment(finalScore);
 
   return `
     <section class="screen result-screen" aria-labelledby="result-title">
@@ -30,12 +50,12 @@ function createResultMarkup(state) {
           <h3 class="result-card__subtitle">Calculate :</h3>
 
           <div class="result-card__rounds">
-            <p>Round 1 : +${state.roundScores[0]}</p>
-            <p>Round 2 : +${state.roundScores[1]}</p>
-            <p>Round 3 : +${state.roundScores[2]}</p>
+            <p>Round 1 : ${roundScores[0] === "-" ? "-" : "+" + roundScores[0]}</p>
+            <p>Round 2 : ${roundScores[1] === "-" ? "-" : "+" + roundScores[1]}</p>
+            <p>Round 3 : ${roundScores[2] === "-" ? "-" : "+" + roundScores[2]}</p>
           </div>
 
-          <p class="result-card__total">Total : ${state.finalScore}</p>
+          <p class="result-card__total">Total : ${finalScore}</p>
           <p class="result-card__comment">${comment}</p>
 
           <div class="result-card__bottom">
@@ -65,12 +85,37 @@ function createResultMarkup(state) {
   `;
 }
 
-function resetGameState() {
+function resetSharedState() {
+  state.currentScreen = "home";
+  state.currentRound = 1;
+  state.totalScore = 10;
+  state.resources = 3;
+  state.currentSchools = [];
+  state.currentEvent = null;
+  state.currentAllocation = [0, 0, 0];
+  state.roundScore = 0;
+  state.allocationHistory = [];
+  state.hintText = "";
+  state.allocationStatus = {
+    allocated: 0,
+    remaining: 3,
+    isComplete: false,
+    percentUsed: 0,
+    status: "提示：請先分配 3 點資源。"
+  };
+}
+
+function resetLocalGameState() {
   gameState.round = 1;
   gameState.points = 10;
   gameState.used = 0;
   gameState.allocations = [0, 0, 0];
   gameState.currentSchools = [];
+}
+
+function resetAllState() {
+  resetSharedState();
+  resetLocalGameState();
 }
 
 function bindResultEvents() {
@@ -79,10 +124,8 @@ function bindResultEvents() {
 
   if (homeBtn) {
     homeBtn.addEventListener("click", () => {
-      // 1. 重設狀態
-      resetGameState();
+      resetAllState();
 
-      // 2. 切回首頁
       const homeRoot = document.querySelector("#home-screen-root");
       const gameRoot = document.querySelector("#game-screen-root");
       const resultRoot = document.querySelector("#result-screen-root");
@@ -95,10 +138,8 @@ function bindResultEvents() {
 
   if (restartBtn) {
     restartBtn.addEventListener("click", () => {
-      // 1. 重設遊戲狀態
-      resetGameState();
+      resetAllState();
 
-      // 2. 切回遊戲頁
       const homeRoot = document.querySelector("#home-screen-root");
       const gameRoot = document.querySelector("#game-screen-root");
       const resultRoot = document.querySelector("#result-screen-root");
@@ -107,20 +148,20 @@ function bindResultEvents() {
       if (gameRoot) gameRoot.style.display = "block";
       if (resultRoot) resultRoot.style.display = "none";
 
-      // 3. 重新 render 第一回合
       renderInfoView();
     });
   }
 }
 
-export function renderResultView(customState = resultState) {
+export function renderResultView() {
   const root = document.querySelector("#result-screen-root");
 
   if (!root) return;
 
-  root.innerHTML = createResultMarkup(customState);
+  root.innerHTML = createResultMarkup();
   bindResultEvents();
 }
+
 document.addEventListener("game:go-result", () => {
   const homeRoot = document.querySelector("#home-screen-root");
   const gameRoot = document.querySelector("#game-screen-root");
