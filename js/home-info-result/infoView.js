@@ -1,4 +1,4 @@
-import { renderResultView } from "./resultView.js";
+import { schoolData } from "../../data-source/export/schoolData.js";
 
 export const gameState = {
   round: 1,
@@ -9,6 +9,7 @@ export const gameState = {
   allocations: [0, 0, 0],
   eventTitle: "交通不便加劇",
   eventDescription: "特偏或極偏學校若未獲資源，本回合 -2 分。",
+  currentSchools: [],
 };
 
 function getHintText(state) {
@@ -23,7 +24,51 @@ function getHintText(state) {
   return "提示：分配完成，請按 FINISH。";
 }
 
+function formatRate(rate) {
+  const numericRate = Number(rate);
+  if (Number.isNaN(numericRate)) return rate;
+  return `${(numericRate * 100).toFixed(1)}%`;
+}
+
+function formatMedianText(isBelow) {
+  return isBelow ? "低於整體中位" : "高於或等於整體中位";
+}
+
+function getRandomSchools(data, count = 3) {
+  const shuffled = [...data].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, count);
+}
+
+function ensureCurrentSchools() {
+  if (!Array.isArray(gameState.currentSchools) || gameState.currentSchools.length !== 3) {
+    gameState.currentSchools = getRandomSchools(schoolData, 3);
+  }
+}
+
+function resetCurrentSchoolsForNextRound() {
+  gameState.currentSchools = getRandomSchools(schoolData, 3);
+}
+
+function createSchoolCardMarkup(school) {
+  return `
+    <article class="school-card">
+      <header class="school-card__header">${school.school_name}</header>
+      <div class="school-card__body">
+        <p>地區：${school.region}</p>
+        <p>偏遠級別：${school.remote_area_level}</p>
+        <p>111學年學生數：${school.count_111}</p>
+        <p>113學年學生數：${school.count_113}</p>
+        <p>學生規模變動率：${formatRate(school.change_rate)}</p>
+        <p>分類結果：${school.change_category}</p>
+        <p>中位比較：${formatMedianText(school.is_below_median)}</p>
+      </div>
+    </article>
+  `;
+}
+
 function createGameMarkup(state) {
+  ensureCurrentSchools();
+
   return `
     <section class="screen game-screen" aria-labelledby="game-title">
       <header class="game-screen__topbar">
@@ -72,38 +117,7 @@ function createGameMarkup(state) {
 
       <div class="game-screen__body">
         <main class="school-grid" aria-label="學校卡片區">
-          <article class="school-card">
-            <header class="school-card__header">School A</header>
-            <div class="school-card__body">
-              <p>地區：東部</p>
-              <p>偏遠級別：特偏</p>
-              <p>學生規模變動率：-8.2%</p>
-              <p>分類結果：明顯下降</p>
-              <p>中位比較：低於整體中位</p>
-            </div>
-          </article>
-
-          <article class="school-card">
-            <header class="school-card__header">School B</header>
-            <div class="school-card__body">
-              <p>地區：南部</p>
-              <p>偏遠級別：偏遠</p>
-              <p>學生規模變動率：-3.1%</p>
-              <p>分類結果：小幅下降</p>
-              <p>中位比較：低於整體中位</p>
-            </div>
-          </article>
-
-          <article class="school-card">
-            <header class="school-card__header">School C</header>
-            <div class="school-card__body">
-              <p>地區：中部</p>
-              <p>偏遠級別：非偏遠</p>
-              <p>學生規模變動率：1.5%</p>
-              <p>分類結果：穩定或成長</p>
-              <p>中位比較：高於整體中位</p>
-            </div>
-          </article>
+          ${state.currentSchools.map(createSchoolCardMarkup).join("")}
         </main>
 
         <aside class="side-actions" aria-label="遊戲操作">
@@ -143,7 +157,6 @@ function updateUsedResource() {
 
 function rerenderInfoView() {
   const root = document.querySelector("#game-screen-root");
-
   if (!root) return;
 
   updateUsedResource();
@@ -189,15 +202,7 @@ function closeEventModal() {
 }
 
 function goToResultScreen() {
-  const homeRoot = document.querySelector("#home-screen-root");
-  const gameRoot = document.querySelector("#game-screen-root");
-  const resultRoot = document.querySelector("#result-screen-root");
-
-  if (homeRoot) homeRoot.style.display = "none";
-  if (gameRoot) gameRoot.style.display = "none";
-  if (resultRoot) resultRoot.style.display = "block";
-
-  renderResultView();
+  document.dispatchEvent(new CustomEvent("game:go-result"));
 }
 
 function handleFinish() {
@@ -208,16 +213,15 @@ function handleFinish() {
     return;
   }
 
-  // 第 1、2 回合：進下一回合
   if (gameState.round < gameState.totalRounds) {
     gameState.round += 1;
     gameState.allocations = [0, 0, 0];
     gameState.used = 0;
+    resetCurrentSchoolsForNextRound();
     rerenderInfoView();
     return;
   }
 
-  // 第 3 回合：跳到結算頁
   goToResultScreen();
 }
 
@@ -226,6 +230,8 @@ function handleEscClose(event) {
     closeEventModal();
   }
 }
+
+let hasBoundEscListener = false;
 
 function bindInfoEvents() {
   const plusButtons = document.querySelectorAll(".plus-btn");
@@ -270,11 +276,13 @@ function bindInfoEvents() {
     backdrop.addEventListener("click", closeEventModal);
   }
 
-  document.addEventListener("keydown", handleEscClose);
+  if (!hasBoundEscListener) {
+    document.addEventListener("keydown", handleEscClose);
+    hasBoundEscListener = true;
+  }
 }
 
 export function renderInfoView() {
+  ensureCurrentSchools();
   rerenderInfoView();
 }
-
-renderInfoView();

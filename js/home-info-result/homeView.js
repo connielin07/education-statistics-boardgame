@@ -65,6 +65,7 @@ function resetGameState() {
   gameState.points = 10;
   gameState.used = 0;
   gameState.allocations = [0, 0, 0];
+  gameState.currentSchools = [];
 }
 
 function goToGameScreen() {

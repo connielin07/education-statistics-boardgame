@@ -70,6 +70,7 @@ function resetGameState() {
   gameState.points = 10;
   gameState.used = 0;
   gameState.allocations = [0, 0, 0];
+  gameState.currentSchools = [];
 }
 
 function bindResultEvents() {
@@ -120,3 +121,14 @@ export function renderResultView(customState = resultState) {
   root.innerHTML = createResultMarkup(customState);
   bindResultEvents();
 }
+document.addEventListener("game:go-result", () => {
+  const homeRoot = document.querySelector("#home-screen-root");
+  const gameRoot = document.querySelector("#game-screen-root");
+  const resultRoot = document.querySelector("#result-screen-root");
+
+  if (homeRoot) homeRoot.style.display = "none";
+  if (gameRoot) gameRoot.style.display = "none";
+  if (resultRoot) resultRoot.style.display = "block";
+
+  renderResultView();
+});
