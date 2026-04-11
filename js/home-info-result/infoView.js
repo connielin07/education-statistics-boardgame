@@ -20,7 +20,7 @@ function getHintText(state) {
     return `提示：尚有 ${state.maxResource - state.used} 點資源未分配完成。`;
   }
 
-  return "提示：資源已分配完成，可按 FINISH。";
+  return "提示：分配完成，請按 FINISH。";
 }
 
 function createGameMarkup(state) {
