@@ -3,10 +3,10 @@ export function initRwdHint() {
   if (!hint) return;
 
   function updateRwdHint() {
-    const isSmallScreen = window.innerWidth <= 900;
-    const isPortrait = window.innerHeight > window.innerWidth;
+    const isSmallScreen = window.innerWidth <= 768;
+    const isLandscape = window.innerWidth > window.innerHeight;
 
-    if (isSmallScreen && isPortrait) {
+    if (isSmallScreen && isLandscape) {
       hint.hidden = false;
       hint.setAttribute("aria-hidden", "false");
     } else {

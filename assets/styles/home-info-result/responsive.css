@@ -1,110 +1,171 @@
-@media (max-width: 1280px) {
-  .game-screen__body {
-    grid-template-columns: 1fr;
-    padding-right: 3.25rem;
+/* 手機橫式：直接提示改成直式 */
+.rotate-hint {
+  display: none;
+}
+
+@media (max-width: 768px) and (orientation: landscape) {
+  .rotate-hint {
+    display: flex;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(17, 17, 17, 0.92);
+    color: #fff;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 24px;
+    font-size: 1.25rem;
+    font-weight: 800;
+    line-height: 1.7;
   }
 
-  .side-actions {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    align-content: start;
-    gap: 1.25rem;
-    padding-right: 0;
+  body > *:not(.rotate-hint) {
+    display: none !important;
   }
 }
 
-@media (max-width: 1040px) {
-  .game-screen__statusbar {
-    grid-template-columns: 1fr;
-    justify-items: start;
+@media (max-width: 768px) {
+  .desktop-only {
+    display: none !important;
   }
 
-  .status-used,
-  .dropdown-button {
-    justify-self: start;
-  }
-
-  .resource-strip,
-  .school-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .resource-strip {
-    padding-right: 3.25rem;
-  }
-
-  .resource-counter {
-    justify-content: flex-start;
-  }
-}
-
-@media (max-width: 720px) {
-  .prototype-board {
-    padding: 0.75rem;
-    gap: 1rem;
-  }
-
-  .home-screen {
-    min-height: 720px;
-  }
-
-  .home-screen__content {
-    width: min(100% - 2rem, 960px);
-  }
-
-  .action-button--primary,
-  .round-badge,
-  .dropdown-button,
-  .action-button--panel {
-    min-width: 0;
-    width: 100%;
-  }
-
-  .game-screen__topbar,
-  .game-screen__statusbar,
-  .resource-strip,
-  .game-screen__body {
-    padding-left: 1.25rem;
-    padding-right: 1.25rem;
+  .mobile-only {
+    display: block;
   }
 
   .game-screen__topbar {
-    align-items: flex-start;
-    flex-direction: column;
+    padding: 16px 16px 12px;
   }
 
-  .side-actions {
-    grid-template-columns: 1fr;
+  .game-screen__topbar h2 {
+    max-width: 56%;
+    font-size: 1.9rem;
+    line-height: 1.2;
+  }
+
+  .round-badge {
+    min-width: 128px;
+    padding: 10px 14px;
+    font-size: 1.1rem;
+    border-radius: 10px;
+  }
+
+  .game-screen__statusbar {
+    grid-template-columns: 110px 1fr;
+    grid-template-areas:
+      "points used"
+      "event hint";
+    gap: 10px 14px;
+    padding: 14px 16px 8px;
+    align-items: center;
+  }
+
+  .status-points {
+    grid-area: points;
+    font-size: 1.15rem;
+    align-self: start;
+  }
+
+  .status-center {
+    grid-area: used;
+    justify-items: center;
+    gap: 6px;
+  }
+
+  .status-used {
+    font-size: 2rem;
+    line-height: 1.1;
+  }
+
+  .game-hint {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    text-align: center;
+  }
+
+  .dropdown-button {
+    grid-area: event;
+    justify-self: start;
+    min-width: 110px;
+    height: 42px;
+    font-size: 1rem;
+    padding: 0 14px;
+  }
+
+  .mobile-control-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    align-items: center;
+    padding: 8px 16px 14px;
+  }
+
+  .mobile-resource-counter {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .mobile-resource-counter strong {
+    font-size: 2.7rem;
+  }
+
+  .mobile-side-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .mobile-side-actions .action-button--panel {
+    min-height: 56px;
+    font-size: 1.1rem;
+    border-radius: 10px;
+  }
+
+  .game-screen__body {
+    display: block;
+    padding: 0 0 18px;
+  }
+
+  .school-grid {
+    display: flex;
+    overflow-x: auto;
+    gap: 14px;
+    padding: 0 16px;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .school-grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .school-grid {
+    scrollbar-width: none;
   }
 
   .school-card {
-    min-height: auto;
+    min-width: calc(100vw - 32px);
+    min-height: 520px;
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+    border-radius: 18px;
   }
 
-  .result-screen {
-    min-height: auto;
-    padding: 1rem 0;
+  .school-card__header {
+    font-size: 1.9rem;
+    padding: 18px 20px;
   }
 
-  .result-card {
-    min-height: auto;
-    padding: 1.5rem 1rem 1.75rem;
+  .school-card__body {
+    padding: 20px;
   }
 
-  .result-card__header {
-    padding: 0 0.5rem 1.25rem;
-  }
-
-  .result-card__body {
-    padding: 2rem 0.5rem 0;
-  }
-
-  .result-outcome {
-    grid-template-columns: 1fr;
-    justify-items: center;
-  }
-
-  .result-actions {
-    width: 100%;
+  .school-card__body p {
+    font-size: 1.15rem;
+    margin-bottom: 16px;
   }
 }
 .rwd-hint {
@@ -116,7 +177,7 @@
 .rwd-hint__backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(36, 45, 70, 0.45);
+  background: rgba(20, 30, 45, 0.72);
 }
 
 .rwd-hint__panel {
@@ -126,7 +187,7 @@
   width: min(88vw, 420px);
   transform: translate(-50%, -50%);
   background: #ffffff;
-  border: 2px solid #48546c;
+  border: 2px solid #59657b;
   border-radius: 18px;
   padding: 24px 20px;
   text-align: center;
@@ -134,7 +195,7 @@
 }
 
 .rwd-hint__title {
-  margin: 0 0 12px 0;
+  margin: 0 0 12px;
   font-size: 1.5rem;
   font-weight: 800;
   color: #2f3a50;
@@ -147,7 +208,8 @@
   color: #5f6f8e;
 }
 
-@media (min-width: 901px) {
+/* 桌機不顯示 */
+@media (min-width: 769px) {
   .rwd-hint {
     display: none !important;
   }
