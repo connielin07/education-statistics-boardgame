@@ -3,6 +3,7 @@ import { renderPage } from './page-and-round-flow/pageFlow.js';
 import { handleRoundTransition } from './page-and-round-flow/roundFlow.js'; // 引入 A 的主責邏輯 
 import { state } from './shared/stateStore.js';
 import { renderHomeView } from './home-info-result/homeView.js';
+import { initRwdHint } from "./home-info-result/rwdHint.js";
 import { renderInfoView } from './home-info-result/infoView.js';
 import { renderResultView } from './home-info-result/resultView.js';
 
@@ -11,6 +12,7 @@ function init() {
   
   // 初始化渲染所有畫面 [cite: 211]
   renderHomeView();
+  initRwdHint();
   renderInfoView();
   renderResultView();
 
