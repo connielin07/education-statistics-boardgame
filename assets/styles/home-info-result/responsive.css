@@ -180,7 +180,18 @@
     height: 42px;
     padding: 0 14px;
     font-size: 1rem;
+
+    display: inline-flex;      /* ⭐ 新增 */
+    align-items: center;       /* ⭐ 新增 */
+    justify-content: center;   /* ⭐ 新增 */
+    gap: 6px;                  /* ⭐ 新增 */
+
+    white-space: nowrap;       /* ⭐ 核心：不換行 */
   }
+
+   .dropdown-button__arrow {
+  display: inline-block;
+ }
 
   .mobile-control-row {
     display: grid !important;

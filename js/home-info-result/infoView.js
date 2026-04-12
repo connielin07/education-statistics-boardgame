@@ -95,7 +95,7 @@ function createGameMarkup(state) {
 
           <button
             id="eventBtn"
-            class="dropdown-button"
+            class="dropdown-button mobile-only"
             type="button"
             aria-haspopup="dialog"
           >

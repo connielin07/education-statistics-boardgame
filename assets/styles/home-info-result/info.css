@@ -190,7 +190,9 @@
   justify-content: center;
 }
 
-/* ===== Event Modal ===== */
+/* ===== Event ===== */
+
+/* Event Modal */
 .event-modal {
   position: fixed;
   inset: 0;
@@ -209,31 +211,50 @@
   left: 50%;
   transform: translate(-50%, -50%);
   width: min(90vw, 420px);
-  background: var(--screen-bg);
-  border: 2px solid var(--screen-border);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-soft);
   padding: var(--space-6);
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
+
+  background: var(--screen-bg);
+  border: 2px solid var(--screen-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-soft);
   text-align: center;
 }
 
 .event-modal__title {
+  margin: 0;
   font-size: 2rem;
   font-weight: 800;
-  margin: 0;
 }
 
 .event-modal__desc {
+  margin: 0;
   font-size: 1.15rem;
   line-height: 1.6;
   color: var(--text-soft);
-  margin: 0;
 }
 
 .event-modal__card .action-button {
   align-self: center;
   min-width: 160px;
+}
+
+/* Desktop Event Button Position */
+@media (min-width: 769px) {
+  .desktop-event-holder {
+    grid-column: 3;
+    width: 180px;
+    margin-top: -4px;
+    display: flex;
+    justify-content: flex-end;
+    justify-self: end;
+    align-self: start;
+  }
+
+  .desktop-event-holder .dropdown-button {
+    width: 100%;
+    min-width: 0;
+  }
 }
