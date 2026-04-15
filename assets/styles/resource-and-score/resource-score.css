@@ -1,0 +1,365 @@
+/**
+ * resource-score.css
+ * 
+ * 職責：
+ * 1. 資源分配操作區的版型與樣式
+ * 2. +/- 按鈕與點數顯示
+ * 3. 資訊列（剩餘點數、已用點數、事件卡）
+ * 4. RESET / FINISH 按鈕區
+ * 
+ * 遵循 UI Guide：扁平、低保真、深色按鈕、藍色外框
+ */
+
+/* ============================================================
+   資源分配操作區 - 主容器
+   ============================================================ */
+
+.resource-allocation-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  padding: var(--space-6);
+  background: var(--screen-bg);
+}
+
+/* ============================================================
+   資訊列 - 剩餘點數 / 已用點數 / 事件卡
+   ============================================================ */
+
+.allocation-info-bar {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border-bottom: 2px solid var(--line-main);
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.info-label {
+  font-size: 0.875rem;
+  color: var(--text-soft);
+  font-weight: 600;
+}
+
+.info-value {
+  font-size: 1.25rem;
+  color: var(--text-main);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.remaining-points {
+  color: #2d9bf0;
+  font-weight: 800;
+}
+
+.used-points {
+  color: var(--text-main);
+  font-weight: 800;
+}
+
+.event-display {
+  font-size: 0.875rem;
+  color: var(--text-soft);
+  text-align: center;
+}
+
+/* ============================================================
+   資源控制器容器 - 三個學校
+   ============================================================ */
+
+.allocation-controllers {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-5);
+  padding: var(--space-4) 0;
+}
+
+.allocation-controller {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.school-label {
+  font-size: 0.875rem;
+  color: var(--text-soft);
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.4;
+  min-height: 2.4rem;
+}
+
+/* ============================================================
+   點數控制組件 - 按鈕組
+   ============================================================ */
+
+.allocation-control-group {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  background: #f0f4f8;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+}
+
+.allocation-btn {
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--panel-fill);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 1.25rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.allocation-btn:hover:not(:disabled) {
+  background: #1f2a3d;
+  transform: scale(1.08);
+}
+
+.allocation-btn:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.allocation-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.allocation-btn--minus {
+  order: 1;
+}
+
+.allocation-btn--plus {
+  order: 3;
+}
+
+.allocation-points-display {
+  order: 2;
+  min-width: 1.5rem;
+  text-align: center;
+  font-size: 1.125rem;
+  color: var(--text-main);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+/* ============================================================
+   提示文字區域
+   ============================================================ */
+
+.allocation-hint {
+  font-size: 0.813rem;
+  color: var(--text-soft);
+  text-align: center;
+  height: 1.2rem;
+  line-height: 1.2;
+  min-height: 1.2rem;
+}
+
+.allocation-hint--warning {
+  color: #d97706;
+  font-weight: 600;
+}
+
+.allocation-hint--success {
+  color: #10b981;
+  font-weight: 600;
+}
+
+/* ============================================================
+   操作按鈕區 - RESET / FINISH
+   ============================================================ */
+
+.allocation-action-buttons {
+  display: flex;
+  gap: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 2px solid var(--line-main);
+}
+
+.action-button {
+  flex: 1;
+  padding: var(--space-4) var(--space-5);
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+.action-button--reset {
+  background: #f3f4f6;
+  color: var(--text-main);
+  border: 2px solid #d1d5db;
+}
+
+.action-button--reset:hover {
+  background: #e5e7eb;
+  border-color: #9ca3af;
+}
+
+.action-button--reset:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.action-button--finish {
+  background: var(--panel-fill);
+  color: #ffffff;
+}
+
+.action-button--finish:hover:not(:disabled) {
+  background: #1f2a3d;
+}
+
+.action-button--finish:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ============================================================
+   狀態指示
+   ============================================================ */
+
+.allocation-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  font-size: 0.875rem;
+  color: var(--text-soft);
+  padding: var(--space-3);
+  background: #f9fafb;
+  border-radius: var(--radius-md);
+  text-align: center;
+  line-height: 1.4;
+}
+
+.allocation-status--incomplete {
+  color: #d97706;
+}
+
+.allocation-status--complete {
+  color: #10b981;
+  font-weight: 600;
+}
+
+/* ============================================================
+   響應式設計 - 小螢幕
+   ============================================================ */
+
+@media (max-width: 768px) {
+  .resource-allocation-section {
+    gap: var(--space-4);
+    padding: var(--space-4);
+  }
+
+  .allocation-info-bar {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+    padding: var(--space-3);
+  }
+
+  .allocation-controllers {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+
+  .allocation-control-group {
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .allocation-btn {
+    width: 2.25rem;
+    height: 2.25rem;
+    font-size: 1.125rem;
+  }
+}
+
+/* ============================================================
+   超小螢幕 - 手機直直版
+   ============================================================ */
+
+@media (max-width: 480px) {
+  .resource-allocation-section {
+    gap: var(--space-3);
+    padding: var(--space-3);
+  }
+
+  .allocation-info-bar {
+    grid-template-columns: 1fr;
+    gap: var(--space-2);
+    padding: var(--space-2);
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .info-label {
+    font-size: 0.75rem;
+  }
+
+  .info-value {
+    font-size: 1rem;
+  }
+
+  .allocation-controllers {
+    gap: var(--space-3);
+  }
+
+  .school-label {
+    font-size: 0.75rem;
+    min-height: 2rem;
+  }
+
+  .allocation-control-group {
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .allocation-btn {
+    width: 2rem;
+    height: 2rem;
+    font-size: 1rem;
+  }
+
+  .allocation-points-display {
+    font-size: 1rem;
+  }
+
+  .action-button {
+    padding: var(--space-3) var(--space-4);
+    font-size: 0.875rem;
+  }
+
+  .allocation-hint {
+    font-size: 0.75rem;
+  }
+
+  .allocation-status {
+    font-size: 0.75rem;
+    padding: var(--space-2);
+  }
+}

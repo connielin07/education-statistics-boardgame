@@ -288,6 +288,238 @@ console.log("最終評語:", feedback);
 
 ---
 
+## 🎨 DOM 結構規範 & 樣式
+
+### HTML 結構
+分配操作區的 HTML 結構應遵循以下規範（樣式已在 `resource-score.css` 中定義）：
+
+```html
+<section class="resource-allocation-section">
+  <!-- 資訊列：剩餘點數 / 已用點數 / 事件卡 -->
+  <div class="allocation-info-bar">
+    <div class="info-item">
+      <span class="info-label">剩餘點數</span>
+      <span class="info-value remaining-points" id="remaining-points">3</span>
+    </div>
+    <div class="info-item">
+      <span class="info-label">已用點數</span>
+      <span class="info-value used-points" id="used-points">0 / 3</span>
+    </div>
+    <div class="info-item">
+      <span class="info-label">事件卡</span>
+      <div class="event-display" id="event-display">點擊展開</div>
+    </div>
+  </div>
+
+  <!-- 三組資源控制器 -->
+  <div class="allocation-controllers">
+    <!-- 學校 1 -->
+    <div class="allocation-controller">
+      <div class="school-label" id="school-name-0">示意學校 1</div>
+      <div class="allocation-control-group">
+        <button class="allocation-btn allocation-btn--minus" data-school="0">−</button>
+        <span class="allocation-points-display" id="school-points-0">0</span>
+        <button class="allocation-btn allocation-btn--plus" data-school="0">+</button>
+      </div>
+      <div class="allocation-hint" id="school-hint-0"></div>
+    </div>
+
+    <!-- 學校 2 -->
+    <div class="allocation-controller">
+      <div class="school-label" id="school-name-1">示意學校 2</div>
+      <div class="allocation-control-group">
+        <button class="allocation-btn allocation-btn--minus" data-school="1">−</button>
+        <span class="allocation-points-display" id="school-points-1">0</span>
+        <button class="allocation-btn allocation-btn--plus" data-school="1">+</button>
+      </div>
+      <div class="allocation-hint" id="school-hint-1"></div>
+    </div>
+
+    <!-- 學校 3 -->
+    <div class="allocation-controller">
+      <div class="school-label" id="school-name-2">示意學校 3</div>
+      <div class="allocation-control-group">
+        <button class="allocation-btn allocation-btn--minus" data-school="2">−</button>
+        <span class="allocation-points-display" id="school-points-2">0</span>
+        <button class="allocation-btn allocation-btn--plus" data-school="2">+</button>
+      </div>
+      <div class="allocation-hint" id="school-hint-2"></div>
+    </div>
+  </div>
+
+  <!-- 操作按鈕區 -->
+  <div class="allocation-action-buttons">
+    <button class="action-button action-button--reset" id="reset-btn">RESET</button>
+    <button class="action-button action-button--finish" id="finish-btn" disabled>FINISH</button>
+  </div>
+
+  <!-- 狀態提示 -->
+  <div class="allocation-status" id="allocation-status">
+    請分配 3 點資源，然後點擊 FINISH
+  </div>
+</section>
+```
+
+### 樣式類別對照表
+
+| 元素 | 類別 | 用途 |
+|------|------|------|
+| 主容器 | `.resource-allocation-section` | 整個分配區域 |
+| 資訊列 | `.allocation-info-bar` | 剩餘點數、已用點數、事件卡 |
+| 控制器組 | `.allocation-controllers` | 三個學校的控制器容器 |
+| +/- 按鈕 | `.allocation-btn` | 加減點按鈕 |
+| 點數顯示 | `.allocation-points-display` | 顯示某校的分配點數 |
+| RESET 按鈕 | `.action-button--reset` | 重設分配 |
+| FINISH 按鈕 | `.action-button--finish` | 完成分配 |
+
+---
+
+## 🔗 事件監聽器綁定指南
+
+### 1. 選擇器參考
+建議在某個初始化檔案中集中定義 DOM 選擇器，方便維護：
+
+```javascript
+// 例如在 shared/domRefs.js 中
+export const allocationDomRefs = {
+  // 按鈕
+  minusBtns: document.querySelectorAll('.allocation-btn--minus'),
+  plusBtns: document.querySelectorAll('.allocation-btn--plus'),
+  resetBtn: document.getElementById('reset-btn'),
+  finishBtn: document.getElementById('finish-btn'),
+
+  // 顯示區域
+  schoolNames: [
+    document.getElementById('school-name-0'),
+    document.getElementById('school-name-1'),
+    document.getElementById('school-name-2')
+  ],
+  schoolPoints: [
+    document.getElementById('school-points-0'),
+    document.getElementById('school-points-1'),
+    document.getElementById('school-points-2')
+  ],
+  schoolHints: [
+    document.getElementById('school-hint-0'),
+    document.getElementById('school-hint-1'),
+    document.getElementById('school-hint-2')
+  ],
+  remainingPoints: document.getElementById('remaining-points'),
+  usedPoints: document.getElementById('used-points'),
+  allocationStatus: document.getElementById('allocation-status')
+};
+```
+
+### 2. 事件監聽綁定示例
+
+```javascript
+import { addPoint, removePoint, resetAllocation, getAllocationInfo } from './resourceAction.js';
+import { canFinishRound, isAllocationComplete } from './ruleCheck.js';
+import { calculateRoundScore } from './scoreRule.js';
+import { allocationDomRefs } from '../shared/domRefs.js';
+
+// 初始化分配狀態
+let currentAllocation = [0, 0, 0];
+const schools = /* 從 D 的 drawCard.js 取得 */;
+const eventCard = /* 從 D 的 drawCard.js 取得 */;
+
+// ========== 加點按鈕 ==========
+allocationDomRefs.plusBtns.forEach((btn, idx) => {
+  btn.addEventListener('click', () => {
+    const result = addPoint(currentAllocation, idx);
+    if (result.success) {
+      currentAllocation = result.newAllocation;
+      updateAllocationUI();
+    }
+  });
+});
+
+// ========== 減點按鈕 ==========
+allocationDomRefs.minusBtns.forEach((btn, idx) => {
+  btn.addEventListener('click', () => {
+    const result = removePoint(currentAllocation, idx);
+    if (result.success) {
+      currentAllocation = result.newAllocation;
+      updateAllocationUI();
+    }
+  });
+});
+
+// ========== RESET 按鈕 ==========
+allocationDomRefs.resetBtn.addEventListener('click', () => {
+  currentAllocation = resetAllocation(currentAllocation);
+  updateAllocationUI();
+});
+
+// ========== FINISH 按鈕 ==========
+allocationDomRefs.finishBtn.addEventListener('click', () => {
+  const validation = canFinishRound(schools, currentAllocation, eventCard);
+  if (validation.valid) {
+    // 計算本回合分數
+    const roundScore = calculateRoundScore(schools, currentAllocation, eventCard);
+    
+    // 回傳給 A 或 B 進行後續處理
+    window.dispatchEvent(new CustomEvent('allocation-finished', {
+      detail: {
+        allocation: currentAllocation,
+        roundScore: roundScore
+      }
+    }));
+  } else {
+    // 顯示錯誤提示
+    console.warn("無法完成分配:", validation.errors);
+  }
+});
+
+// ========== UI 更新函數 ==========
+function updateAllocationUI() {
+  const info = getAllocationInfo(currentAllocation);
+
+  // 更新各校的點數顯示
+  currentAllocation.forEach((points, idx) => {
+    allocationDomRefs.schoolPoints[idx].textContent = points;
+  });
+
+  // 更新剩餘點數和已用點數
+  allocationDomRefs.remainingPoints.textContent = info.remaining;
+  allocationDomRefs.usedPoints.textContent = `${info.allocated} / 3`;
+
+  // 更新狀態message與按鈕狀態
+  if (info.isComplete) {
+    allocationDomRefs.allocationStatus.textContent = '✓ 分配完成，可點擊 FINISH';
+    allocationDomRefs.allocationStatus.classList.remove('allocation-status--incomplete');
+    allocationDomRefs.allocationStatus.classList.add('allocation-status--complete');
+    allocationDomRefs.finishBtn.disabled = false;
+  } else {
+    allocationDomRefs.allocationStatus.textContent = `請再分配 ${info.remaining} 點資源`;
+    allocationDomRefs.allocationStatus.classList.add('allocation-status--incomplete');
+    allocationDomRefs.allocationStatus.classList.remove('allocation-status--complete');
+    allocationDomRefs.finishBtn.disabled = true;
+  }
+}
+
+// 初始化 UI
+updateAllocationUI();
+```
+
+### 3. 與其他模組的事件通信
+
+```javascript
+// C 發出事件給 A（頁面控制）
+window.addEventListener('allocation-finished', (event) => {
+  const { allocation, roundScore } = event.detail;
+  // A 接收後進行回合狀態更新
+});
+
+// B 監聽分配變化來顯示提示文字
+window.addEventListener('allocation-updated', (event) => {
+  const { remaining, status } = event.detail;
+  // B 更新提示文字
+});
+```
+
+---
+
 ## 📚 下一步工作
 
 1. **立即做**：
