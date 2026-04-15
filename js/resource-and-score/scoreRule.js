@@ -284,6 +284,127 @@ export function getResultFeedback(totalScore) {
 }
 
 // ============================================================
+// 容錯處理 & 詳細報告
+// ============================================================
+
+/**
+ * 安全計算回合分數（含容錯機制）
+ * 如果輸入無效，返回 { success: false, error, score: 0 }
+ * 
+ * @param {array} schools - 所有學校資料
+ * @param {array} allocation - 資源分配
+ * @param {object} eventCard - 事件卡
+ * @returns {object} { success: boolean, score: number, error?: string }
+ */
+export function calculateRoundScoreSafe(schools, allocation, eventCard) {
+  // 驗證輸入
+  if (!Array.isArray(schools) || schools.length !== 3) {
+    return { success: false, score: 0, error: "學校陣列無效" };
+  }
+  
+  if (!Array.isArray(allocation) || allocation.length !== 3) {
+    return { success: false, score: 0, error: "分配陣列無效" };
+  }
+  
+  if (!eventCard || typeof eventCard !== 'object') {
+    return { success: false, score: 0, error: "事件卡無效" };
+  }
+  
+  try {
+    const score = calculateRoundScore(schools, allocation, eventCard);
+    return { success: true, score: score };
+  } catch (e) {
+    return { success: false, score: 0, error: `計算錯誤: ${e.message}` };
+  }
+}
+
+/**
+ * 獲取詳細的計分報告（用於 UI 顯示與調試）
+ * 
+ * @param {array} schools - 學校資料
+ * @param {array} allocation - 資源分配
+ * @param {object} eventCard - 事件卡
+ * @returns {object} 詳細的計分breakdown
+ */
+export function getDetailedScoreReport(schools, allocation, eventCard) {
+  const report = {
+    schoolScores: [],
+    baseScoreTotal: 0,
+    medianBonusTotal: 0,
+    eventEffect: 0,
+    roundScore: 0,
+    eventTitle: eventCard?.title || "無事件",
+    breakdown: ""
+  };
+  
+  // 計算各校分數
+  for (let i = 0; i < schools.length; i++) {
+    const school = schools[i];
+    const points = allocation[i];
+    const baseScore = calculateSchoolBaseScore(school.change_category, points);
+    const medianBonus = calculateMedianBonus(school.is_below_median, points);
+    const schoolTotal = baseScore + medianBonus;
+    
+    report.schoolScores.push({
+      schoolName: school.school_name,
+      allocatedPoints: points,
+      category: school.change_category,
+      baseScore: baseScore,
+      medianBonus: medianBonus,
+      schoolTotal: schoolTotal
+    });
+    
+    report.baseScoreTotal += baseScore;
+    report.medianBonusTotal += medianBonus;
+  }
+  
+  // 計算事件卡效果
+  report.eventEffect = calculateEventEffect(eventCard, schools, allocation);
+  report.roundScore = report.baseScoreTotal + report.medianBonusTotal + report.eventEffect;
+  
+  // 生成人類可讀的 breakdown
+  report.breakdown = `基礎分: ${report.baseScoreTotal}, 中位加成: ${report.medianBonusTotal}, 事件卡: ${report.eventEffect > 0 ? '+' : ''}${report.eventEffect} = 總計 ${report.roundScore}`;
+  
+  return report;
+}
+
+/**
+ * 計算所有可能的分配方案的得分（用於 AI 或提示）
+ * 返回排序後的分配方案和對應分數
+ * 
+ * @param {array} schools - 學校資料
+ * @param {object} eventCard - 事件卡
+ * @returns {array} [{allocation, score}] 按分數排序（降序）
+ */
+export function getAllAllocationScores(schools, eventCard) {
+  const allAllocations = [
+    [0, 0, 3], [0, 1, 2], [0, 2, 1], [0, 3, 0],
+    [1, 0, 2], [1, 1, 1], [1, 2, 0],
+    [2, 0, 1], [2, 1, 0],
+    [3, 0, 0]
+  ];
+  
+  const results = allAllocations.map(allocation => ({
+    allocation: allocation,
+    score: calculateRoundScore(schools, allocation, eventCard)
+  }));
+  
+  // 按分數降序排列
+  return results.sort((a, b) => b.score - a.score);
+}
+
+/**
+ * 獲取最優分配方案
+ * @param {array} schools - 學校資料
+ * @param {object} eventCard - 事件卡
+ * @returns {object} { allocation: array, score: number }
+ */
+export function getBestAllocation(schools, eventCard) {
+  const scores = getAllAllocationScores(schools, eventCard);
+  return scores[0] || { allocation: [0, 0, 0], score: 0 };
+}
+
+// ============================================================
 // 假資料（用於測試）
 // ============================================================
 

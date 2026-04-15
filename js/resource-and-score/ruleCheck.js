@@ -264,6 +264,186 @@ export function canClickFinish(allocation) {
   return isAllocationComplete(allocation);
 }
 
+/**
+ * 全面驗證（適用於遊戲提交時）
+ * 一次檢查所有必要的遊戲狀態
+ * 
+ * @param {array} schools - 學校資料
+ * @param {array} allocation - 資源分配
+ * @param {object} eventCard - 事件卡
+ * @returns {object} { valid: boolean, allErrors?: array, summary?: string }
+ */
+export function validateFullGameState(schools, allocation, eventCard) {
+  const allErrors = [];
+  
+  // 驗證分配
+  const allocCheck = validateAllocation(allocation);
+  if (!allocCheck.valid) allErrors.push(`分配: ${allocCheck.error}`);
+  
+  // 驗證學校
+  const schoolsCheck = validateSchools(schools);
+  if (!schoolsCheck.valid) allErrors.push(...schoolsCheck.errors);
+  
+  // 驗證事件卡
+  if (!validateEventCard(eventCard)) {
+    allErrors.push("事件卡: 資料不完整");
+  }
+  
+  const valid = allErrors.length === 0;
+  
+  return {
+    valid: valid,
+    allErrors: valid ? undefined : allErrors,
+    summary: valid ? "✅ 所有檢查通過" : `❌ 發現 ${allErrors.length} 個錯誤`
+  };
+}
+
+/**
+ * 獲取分配的詳細驗證報告
+ * 用於向玩家提供清晰的反饋
+ * 
+ * @param {array} allocation - 資源分配
+ * @returns {object} 詳細的驗證報告
+ */
+export function getAllocationValidationReport(allocation) {
+  const report = {
+    valid: true,
+    errors: [],
+    warnings: [],
+    details: {
+      total: 0,
+      remaining: 0,
+      isComplete: false,
+      perSchool: []
+    }
+  };
+  
+  // 基本驗證
+  if (!Array.isArray(allocation) || allocation.length !== 3) {
+    report.valid = false;
+    report.errors.push("分配陣列必須包含 3 個值");
+    return report;
+  }
+  
+  // 檢查各校值
+  let total = 0;
+  for (let i = 0; i < 3; i++) {
+    const val = allocation[i];
+    report.details.perSchool.push({
+      schoolIndex: i,
+      points: val,
+      valid: isValidAllocationValue(val)
+    });
+    
+    if (!isValidAllocationValue(val)) {
+      report.valid = false;
+      report.errors.push(`第 ${i + 1} 校: 值 ${val} 超出有效範圍 (0-3)`);
+    } else {
+      total += val;
+    }
+  }
+  
+  report.details.total = total;
+  report.details.remaining = 3 - total;
+  report.details.isComplete = total === 3;
+  
+  // 檢查總數
+  if (total !== 3) {
+    if (total > 3) {
+      report.valid = false;
+      report.errors.push(`分配總數 ${total} 超過 3 點（超出 ${total - 3} 點）`);
+    } else {
+      report.valid = false;
+      report.errors.push(`分配總數 ${total}，還需要 ${3 - total} 點`);
+    }
+  }
+  
+  return report;
+}
+
+/**
+ * 檢查特定操作是否可行（用於按鈕 disabled 狀態）
+ * 
+ * @param {array} allocation - 目前分配
+ * @param {number} schoolIndex - 學校索引
+ * @param {string} operation - "add" 或 "remove"
+ * @returns {object} { canDo: boolean, reason?: string }
+ */
+export function canPerformOperation(allocation, schoolIndex, operation) {
+  if (schoolIndex < 0 || schoolIndex >= 3) {
+    return { canDo: false, reason: "學校索引無效" };
+  }
+  
+  if (operation === "add") {
+    const can = canAddAllocation(allocation, schoolIndex, 1);
+    if (!can) {
+      const remaining = getRemainingPoints(allocation);
+      if (remaining === 0) {
+        return { canDo: false, reason: "資源已全部分配完成" };
+      } else {
+        return { canDo: false, reason: "該校已滿或總資源超過限制" };
+      }
+    }
+    return { canDo: true };
+  }
+  
+  if (operation === "remove") {
+    if (allocation[schoolIndex] <= 0) {
+      return { canDo: false, reason: "該校已無可減的資源" };
+    }
+    return { canDo: true };
+  }
+  
+  return { canDo: false, reason: "操作類型無效" };
+}
+
+/**
+ * 獲取當前可分配的學校列表（用於提示或推薦）
+ * 返回可以接受更多資源的學校索引
+ * 
+ * @param {array} allocation - 目前分配
+ * @returns {array} 可分配的學校索引 [0] 或 [0, 1] 等
+ */
+export function getAvailableSchoolsForAllocation(allocation) {
+  const available = [];
+  for (let i = 0; i < 3; i++) {
+    if (canAddAllocation(allocation, i, 1)) {
+      available.push(i);
+    }
+  }
+  return available;
+}
+
+/**
+ * 測試模式：驗證邊界情況
+ * 返回該分配方案可能存在的問題警告
+ * 
+ * @param {array} allocation - 資源分配
+ * @returns {array} 警告訊息陣列
+ */
+export function getAllocationWarnings(allocation) {
+  const warnings = [];
+  
+  const total = allocation.reduce((sum, p) => sum + p, 0);
+  
+  if (total === 0) {
+    warnings.push("⚠️ 未分配任何資源");
+  }
+  
+  if (total === 3 && allocation.some(p => p === 0)) {
+    if (allocation.filter(p => p > 0).length === 1) {
+      warnings.push("⚠️ 所有資源集中在一所學校");
+    }
+  }
+  
+  const zeroCount = allocation.filter(p => p === 0).length;
+  if (zeroCount === 2) {
+    warnings.push("⚠️ 有兩所學校未獲資源，可能觸發多個負面事件");
+  }
+  
+  return warnings;
+}
+
 // ============================================================
 // 測試用輔助函數
 // ============================================================

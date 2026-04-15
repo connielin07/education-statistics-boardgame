@@ -16,7 +16,10 @@ import {
   canAddAllocation, 
   getRemainingPoints, 
   isAllocationComplete,
-  getAllocationStatus
+  getAllocationStatus,
+  canPerformOperation,
+  getAvailableSchoolsForAllocation,
+  getAllocationWarnings
 } from './ruleCheck.js';
 
 // ============================================================
@@ -326,4 +329,182 @@ export function generateRandomAllocation() {
   
   const randomIdx = Math.floor(Math.random() * allocations.length);
   return allocations[randomIdx];
+}
+
+// ============================================================
+// 增強型操作（含驗證與詳情）
+// ============================================================
+
+/**
+ * 智慧加點 - 自動檢查是否可行，返回詳細結果
+ * 
+ * @param {array} allocation - 目前分配
+ * @param {number} schoolIndex - 學校索引
+ * @returns {object} {
+ *   success: boolean,
+ *   newAllocation?: array,
+ *   error?: string,
+ *   warning?: string,
+ *   canContinue: boolean  // 加完後還能繼續加
+ * }
+ */
+export function addPointSmart(allocation, schoolIndex) {
+  const canOp = canPerformOperation(allocation, schoolIndex, "add");
+  
+  if (!canOp.canDo) {
+    return { success: false, error: canOp.reason, canContinue: false };
+  }
+  
+  const result = addPoint(allocation, schoolIndex);
+  
+  if (result.success) {
+    const newRemaining = getRemainingPoints(result.newAllocation);
+    return {
+      success: true,
+      newAllocation: result.newAllocation,
+      canContinue: newRemaining > 0,
+      warning: newRemaining === 0 ? "✅ 資源已分配完成！可點擊 FINISH。" : undefined
+    };
+  }
+  
+  return { success: false, error: result.error, canContinue: true };
+}
+
+/**
+ * 智慧減點 - 自動檢查是否可行
+ * 
+ * @param {array} allocation - 目前分配
+ * @param {number} schoolIndex - 學校索引
+ * @returns {object} { success: boolean, newAllocation?: array, error?: string }
+ */
+export function removePointSmart(allocation, schoolIndex) {
+  const canOp = canPerformOperation(allocation, schoolIndex, "remove");
+  
+  if (!canOp.canDo) {
+    return { success: false, error: canOp.reason };
+  }
+  
+  return removePoint(allocation, schoolIndex);
+}
+
+/**
+ * 獲取操作建議（用於 UI 提示）
+ * 告訴玩家目前的分配狀態和下一步可以做什麼
+ * 
+ * @param {array} allocation - 目前分配
+ * @returns {object} {
+ *   nextStep: string,           // 下一步建議
+ *   canFinish: boolean,         // 是否可以完成
+ *   availableSchools: array,    // 可分配的學校
+ *   warnings: array             // 警告訊息
+ * }
+ */
+export function getAllocationAdvice(allocation) {
+  const total = getTotalAllocated(allocation);
+  const remaining = getRemainingPoints(allocation);
+  const isComplete = isAllocationComplete(allocation);
+  const available = getAvailableSchoolsForAllocation(allocation);
+  const warnings = getAllocationWarnings(allocation);
+  
+  let nextStep = "";
+  
+  if (total === 0) {
+    nextStep = "請開始分配資源。點擊任意學校的 + 按鈕。";
+  } else if (remaining === 0) {
+    nextStep = "資源已分配完成！點擊 FINISH 按鈕提交。";
+  } else if (remaining === 1) {
+    nextStep = `還剩 1 點資源。可分配給 ${available.length} 個學校。`;
+  } else {
+    nextStep = `還剩 ${remaining} 點資源。可分配給 ${available.length} 個學校。`;
+  }
+  
+  return {
+    nextStep: nextStep,
+    canFinish: isComplete,
+    availableSchools: available,
+    warnings: warnings
+  };
+}
+
+/**
+ * 驗證整個分配流程（用於提交前最後檢查）
+ * 返回是否所有條件都滿足
+ * 
+ * @param {array} allocation - 資源分配
+ * @param {array?} schools - 學校資料（可選，用於額外驗證）
+ * @returns {object} {
+ *   valid: boolean,
+ *   missingPoints?: number,
+ *   issues?: array,
+ *   readyToSubmit: boolean
+ * }
+ */
+export function validateAllocationFlow(allocation, schools = null) {
+  const issues = [];
+  const total = getTotalAllocated(allocation);
+  const remaining = getRemainingPoints(allocation);
+  
+  if (total < 3) {
+    issues.push(`資源未完全分配（已分配 ${total}/3 點）`);
+  }
+  
+  if (total > 3) {
+    issues.push(`資源超額分配（已分配 ${total} 點，應為 3 點）`);
+  }
+  
+  if (allocation.some(p => !Number.isInteger(p) || p < 0 || p > 3)) {
+    issues.push("分配值無效");
+  }
+  
+  // 如果提供校資料，檢查是否全部未獲資源（會失分）
+  if (schools && Array.isArray(schools)) {
+    const zeroAllocCount = allocation.filter(p => p === 0).length;
+    if (zeroAllocCount === 3) {
+      issues.push("警告：所有學校都未獲資源！");
+    }
+    if (zeroAllocCount === 2) {
+      issues.push("警告：有兩所學校未獲資源，可能觸發負面事件。");
+    }
+  }
+  
+  return {
+    valid: total === 3,
+    missingPoints: remaining,
+    issues: issues.length > 0 ? issues : undefined,
+    readyToSubmit: total === 3 && issues.length === 0
+  };
+}
+
+/**
+ * 比較分配方案（用於「是否改進」提示）
+ * 
+ * @param {array} currentAllocation - 目前分配
+ * @param {array} previousAllocation - 前一個分配
+ * @returns {object} {
+ *   improved: boolean,
+ *   detail: string
+ * }
+ */
+export function compareAllocations(currentAllocation, previousAllocation) {
+  if (!previousAllocation || previousAllocation.every(p => p === 0)) {
+    return {
+      improved: "new",
+      detail: "首次分配"
+    };
+  }
+  
+  const currentStr = JSON.stringify(currentAllocation);
+  const previousStr = JSON.stringify(previousAllocation);
+  
+  if (currentStr === previousStr) {
+    return {
+      improved: false,
+      detail: "分配未改變"
+    };
+  }
+  
+  return {
+    improved: true,
+    detail: `從 [${previousAllocation}] 改為 [${currentAllocation}]`
+  };
 }
