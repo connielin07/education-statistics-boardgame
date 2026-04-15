@@ -32,7 +32,12 @@ function getFinalScore() {
   if (typeof state.totalScore === "number") {
     return state.totalScore;
   }
-  return 10;
+  return 0;
+}
+
+function formatRoundScore(score) {
+  if (score === "-") return "-";
+  return score > 0 ? `+${score}` : `${score}`;
 }
 
 function createResultMarkup() {
@@ -50,9 +55,9 @@ function createResultMarkup() {
           <h3 class="result-card__subtitle">Calculate :</h3>
 
           <div class="result-card__rounds">
-            <p>Round 1 : ${roundScores[0] === "-" ? "-" : "+" + roundScores[0]}</p>
-            <p>Round 2 : ${roundScores[1] === "-" ? "-" : "+" + roundScores[1]}</p>
-            <p>Round 3 : ${roundScores[2] === "-" ? "-" : "+" + roundScores[2]}</p>
+            <p>Round 1 : ${formatRoundScore(roundScores[0])}</p>
+            <p>Round 2 : ${formatRoundScore(roundScores[1])}</p>
+            <p>Round 3 : ${formatRoundScore(roundScores[2])}</p>
           </div>
 
           <p class="result-card__total">Total : ${finalScore}</p>
@@ -111,6 +116,7 @@ function resetLocalGameState() {
   gameState.used = 0;
   gameState.allocations = [0, 0, 0];
   gameState.currentSchools = [];
+  gameState.activeCardIndex = 0;
 }
 
 function resetAllState() {

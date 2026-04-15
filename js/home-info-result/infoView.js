@@ -1,4 +1,6 @@
 import { schoolData } from "../../data-source/export/schoolData.js";
+import { calculateRoundScore, updateTotalScore } from "../resource-and-score/scoreRule.js";
+import { state } from "../shared/stateStore.js";
 
 export const gameState = {
   round: 1,
@@ -13,13 +15,13 @@ export const gameState = {
   activeCardIndex: 0,
 };
 
-function getHintText(state) {
-  if (state.used === 0) {
+function getHintText(viewState) {
+  if (viewState.used === 0) {
     return "提示：請先分配 3 點資源。";
   }
 
-  if (state.used < state.maxResource) {
-    return `提示：尚有 ${state.maxResource - state.used} 點資源未分配完成。`;
+  if (viewState.used < viewState.maxResource) {
+    return `提示：尚有 ${viewState.maxResource - viewState.used} 點資源未分配完成。`;
   }
 
   return "提示：資源已分配完成，可按 FINISH。";
@@ -40,15 +42,34 @@ function getRandomSchools(data, count = 3) {
   return shuffled.slice(0, count);
 }
 
+function syncPointsFromSharedState() {
+  if (typeof state.totalScore !== "number") {
+    state.totalScore = 10;
+  }
+  gameState.points = state.totalScore;
+}
+
+function syncSharedStateForRound() {
+  state.currentRound = gameState.round;
+  state.currentSchools = [...gameState.currentSchools];
+  state.currentAllocation = [...gameState.allocations];
+  state.currentEvent = {
+    title: gameState.eventTitle,
+    description: gameState.eventDescription,
+  };
+}
+
 function ensureCurrentSchools() {
   if (!Array.isArray(gameState.currentSchools) || gameState.currentSchools.length !== 3) {
     gameState.currentSchools = getRandomSchools(schoolData, 3);
   }
+  syncSharedStateForRound();
 }
 
 function resetCurrentSchoolsForNextRound() {
   gameState.currentSchools = getRandomSchools(schoolData, 3);
   gameState.activeCardIndex = 0;
+  syncSharedStateForRound();
 }
 
 function createSchoolCardMarkup(school, index) {
@@ -76,22 +97,23 @@ function createDesktopResourceCounter(index) {
   `;
 }
 
-function createGameMarkup(state) {
+function createGameMarkup(viewState) {
   ensureCurrentSchools();
+  syncPointsFromSharedState();
 
-  const activeIndex = state.activeCardIndex;
-  const activeValue = state.allocations[activeIndex] ?? 0;
+  const activeIndex = viewState.activeCardIndex;
+  const activeValue = viewState.allocations[activeIndex] ?? 0;
 
   return `
     <section class="screen game-screen" aria-labelledby="game-title">
       <header class="game-screen__topbar">
         <h2 id="game-title">偏鄉高級中等校園資源調度戰</h2>
-        <div class="round-badge">ROUND ${state.round}/${state.totalRounds}</div>
+        <div class="round-badge">ROUND ${viewState.round}/${viewState.totalRounds}</div>
       </header>
 
       <div class="game-screen__statusbar">
         <div class="mobile-points-event">
-          <p class="status-points">POINTS : ${state.points}</p>
+          <p class="status-points">POINTS : ${viewState.points}</p>
 
           <button
             id="eventBtn"
@@ -105,8 +127,8 @@ function createGameMarkup(state) {
         </div>
 
         <div class="status-center">
-          <p class="status-used">USED: ${state.used} / ${state.maxResource}</p>
-          <p class="game-hint">${getHintText(state)}</p>
+          <p class="status-used">USED: ${viewState.used} / ${viewState.maxResource}</p>
+          <p class="game-hint">${getHintText(viewState)}</p>
         </div>
 
         <div class="desktop-event-holder desktop-only">
@@ -122,14 +144,12 @@ function createGameMarkup(state) {
         </div>
       </div>
 
-      <!-- 桌機 -->
       <div class="resource-strip desktop-only" aria-label="資源調整列">
         ${createDesktopResourceCounter(0)}
         ${createDesktopResourceCounter(1)}
         ${createDesktopResourceCounter(2)}
       </div>
 
-      <!-- 手機 -->
       <div class="mobile-control-row mobile-only">
         <div class="mobile-resource-counter">
           <button
@@ -159,7 +179,7 @@ function createGameMarkup(state) {
 
       <div class="game-screen__body">
         <main class="school-grid" aria-label="學校卡片區">
-          ${state.currentSchools.map((school, index) => createSchoolCardMarkup(school, index)).join("")}
+          ${viewState.currentSchools.map((school, index) => createSchoolCardMarkup(school, index)).join("")}
         </main>
 
         <aside class="side-actions desktop-only" aria-label="遊戲操作">
@@ -177,8 +197,8 @@ function createGameMarkup(state) {
           aria-modal="true"
           aria-labelledby="eventModalTitle"
         >
-          <h3 id="eventModalTitle" class="event-modal__title">${state.eventTitle}</h3>
-          <p class="event-modal__desc">${state.eventDescription}</p>
+          <h3 id="eventModalTitle" class="event-modal__title">${viewState.eventTitle}</h3>
+          <p class="event-modal__desc">${viewState.eventDescription}</p>
 
           <button
             id="closeEventBtn"
@@ -195,13 +215,17 @@ function createGameMarkup(state) {
 
 function updateUsedResource() {
   gameState.used = gameState.allocations.reduce((sum, value) => sum + value, 0);
+  state.currentAllocation = [...gameState.allocations];
 }
 
 function rerenderInfoView() {
   const root = document.querySelector("#game-screen-root");
   if (!root) return;
 
+  syncPointsFromSharedState();
   updateUsedResource();
+  syncSharedStateForRound();
+
   root.innerHTML = createGameMarkup(gameState);
   bindInfoEvents();
 
@@ -226,6 +250,7 @@ function increaseResource(index) {
   }
 
   gameState.allocations[index] += 1;
+  state.currentAllocation = [...gameState.allocations];
   rerenderInfoView();
 }
 
@@ -235,11 +260,13 @@ function decreaseResource(index) {
   }
 
   gameState.allocations[index] -= 1;
+  state.currentAllocation = [...gameState.allocations];
   rerenderInfoView();
 }
 
 function resetResources() {
   gameState.allocations = [0, 0, 0];
+  state.currentAllocation = [0, 0, 0];
   rerenderInfoView();
 }
 
@@ -267,10 +294,35 @@ function handleFinish() {
     return;
   }
 
+  syncSharedStateForRound();
+
+  const roundScore = calculateRoundScore(
+    gameState.currentSchools,
+    gameState.allocations,
+    {
+      title: gameState.eventTitle,
+      description: gameState.eventDescription,
+    }
+  );
+
+  state.roundScore = roundScore;
+  state.allocationHistory.push({
+    round: gameState.round,
+    allocation: [...gameState.allocations],
+    roundScore,
+    eventTitle: gameState.eventTitle,
+  });
+
+  state.totalScore = updateTotalScore(state.totalScore, roundScore);
+  gameState.points = state.totalScore;
+
   if (gameState.round < gameState.totalRounds) {
     gameState.round += 1;
+    state.currentRound = gameState.round;
     gameState.allocations = [0, 0, 0];
+    state.currentAllocation = [0, 0, 0];
     gameState.used = 0;
+
     resetCurrentSchoolsForNextRound();
     rerenderInfoView();
     return;
@@ -398,5 +450,7 @@ function bindInfoEvents() {
 
 export function renderInfoView() {
   ensureCurrentSchools();
+  syncPointsFromSharedState();
+  syncSharedStateForRound();
   rerenderInfoView();
 }
