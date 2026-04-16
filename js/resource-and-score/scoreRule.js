@@ -37,7 +37,7 @@
  */
 export function getBaseScorePerPoint(classification) {
   const scoreMap = {
-    "明顯下降": 2,
+    "明顯下降": 3,
     "小幅下降": 1,
     "穩定或成長": 0
   };
@@ -259,14 +259,14 @@ export function updateTotalScore(currentTotalScore, roundScore) {
  * @returns {object} 結果評語物件
  */
 export function getResultFeedback(totalScore) {
-  if (totalScore >= 20) {
+  if (totalScore >= 28) {
     return {
       level: "A",
       title: "資源調度成效良好",
       message: "恭喜！你的資源分配策略非常出色，各校獲得適切支援。",
       score: totalScore
     };
-  } else if (totalScore >= 15) {
+  } else if (totalScore >= 18) {
     return {
       level: "B",
       title: "整體校務支持大致穩定",
