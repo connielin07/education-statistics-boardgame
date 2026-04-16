@@ -65,7 +65,12 @@ function resetGameState() {
   gameState.points = 10;
   gameState.used = 0;
   gameState.allocations = [0, 0, 0];
+  gameState.currentEvent = null;
+  gameState.usedEventIds = [];
+  gameState.eventModalShownRound = null;
+  gameState.isGameActive = true;
   gameState.currentSchools = [];
+  gameState.activeCardIndex = 0;
 }
 
 function goToGameScreen() {

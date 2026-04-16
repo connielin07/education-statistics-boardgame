@@ -352,7 +352,7 @@ export const schoolData = [
   {
     "school_name": "市立金山高中",
     "region": "北部",
-    "remote_area_level": "非偏遠",
+    "remote_area_level": "偏遠",
     "count_111": "348",
     "count_113": "283",
     "change_rate": "-0.187 ",
@@ -372,7 +372,7 @@ export const schoolData = [
   {
     "school_name": "市立雙溪高中",
     "region": "北部",
-    "remote_area_level": "非偏遠",
+    "remote_area_level": "偏遠",
     "count_111": "226",
     "count_113": "210",
     "change_rate": "-0.071 ",
@@ -382,7 +382,7 @@ export const schoolData = [
   {
     "school_name": "市立石碇高中",
     "region": "北部",
-    "remote_area_level": "非偏遠",
+    "remote_area_level": "偏遠",
     "count_111": "477",
     "count_113": "457",
     "change_rate": "-0.042 ",
@@ -462,7 +462,7 @@ export const schoolData = [
   {
     "school_name": "市立豐珠中學",
     "region": "北部",
-    "remote_area_level": "非偏遠",
+    "remote_area_level": "偏遠",
     "count_111": "4",
     "count_113": "5",
     "change_rate": "0.250 ",
@@ -522,7 +522,7 @@ export const schoolData = [
   {
     "school_name": "縣立南澳高中",
     "region": "北部",
-    "remote_area_level": "非偏遠",
+    "remote_area_level": "偏遠",
     "count_111": "157",
     "count_113": "134",
     "change_rate": "-0.146 ",
@@ -802,7 +802,7 @@ export const schoolData = [
   {
     "school_name": "市立羅浮高中",
     "region": "北部",
-    "remote_area_level": "非偏遠",
+    "remote_area_level": "偏遠",
     "count_111": "107",
     "count_113": "181",
     "change_rate": "0.692 ",
@@ -1612,7 +1612,7 @@ export const schoolData = [
   {
     "school_name": "縣立麥寮高中",
     "region": "中部",
-    "remote_area_level": "非偏遠",
+    "remote_area_level": "偏遠",
     "count_111": "459",
     "count_113": "405",
     "change_rate": "-0.118 ",
@@ -1622,7 +1622,7 @@ export const schoolData = [
   {
     "school_name": "縣立古坑華德福實驗高級中學",
     "region": "中部",
-    "remote_area_level": "非偏遠",
+    "remote_area_level": "特偏",
     "count_111": "65",
     "count_113": "59",
     "change_rate": "-0.092 ",
@@ -1632,7 +1632,7 @@ export const schoolData = [
   {
     "school_name": "縣立蔦松藝術高中",
     "region": "中部",
-    "remote_area_level": "非偏遠",
+    "remote_area_level": "偏遠",
     "count_111": "121",
     "count_113": "111",
     "change_rate": "-0.083 ",
@@ -1742,7 +1742,7 @@ export const schoolData = [
   {
     "school_name": "國立後壁高中",
     "region": "南部",
-    "remote_area_level": "非偏遠",
+    "remote_area_level": "偏遠",
     "count_111": "591",
     "count_113": "552",
     "change_rate": "-0.066 ",
@@ -1992,7 +1992,7 @@ export const schoolData = [
   {
     "school_name": "市立六龜高中",
     "region": "南部",
-    "remote_area_level": "非偏遠",
+    "remote_area_level": "極偏",
     "count_111": "93",
     "count_113": "77",
     "change_rate": "-0.172 ",
@@ -2102,7 +2102,7 @@ export const schoolData = [
   {
     "school_name": "縣立枋寮高中",
     "region": "南部",
-    "remote_area_level": "非偏遠",
+    "remote_area_level": "偏遠",
     "count_111": "260",
     "count_113": "250",
     "change_rate": "-0.038 ",
@@ -2122,7 +2122,7 @@ export const schoolData = [
   {
     "school_name": "縣立來義高中",
     "region": "南部",
-    "remote_area_level": "非偏遠",
+    "remote_area_level": "偏遠",
     "count_111": "178",
     "count_113": "136",
     "change_rate": "-0.236 ",
@@ -2182,7 +2182,7 @@ export const schoolData = [
   {
     "school_name": "縣立蘭嶼高中",
     "region": "東部",
-    "remote_area_level": "非偏遠",
+    "remote_area_level": "特偏",
     "count_111": "35",
     "count_113": "38",
     "change_rate": "0.086 ",
@@ -2212,7 +2212,7 @@ export const schoolData = [
   {
     "school_name": "國立玉里高中",
     "region": "東部",
-    "remote_area_level": "非偏遠",
+    "remote_area_level": "偏遠",
     "count_111": "448",
     "count_113": "379",
     "change_rate": "-0.154 ",
@@ -2262,7 +2262,7 @@ export const schoolData = [
   {
     "school_name": "縣立南平中學",
     "region": "東部",
-    "remote_area_level": "非偏遠",
+    "remote_area_level": "偏遠",
     "count_111": "9",
     "count_113": "16",
     "change_rate": "0.778 ",
@@ -2272,7 +2272,7 @@ export const schoolData = [
   {
     "school_name": "國立馬公高中",
     "region": "離島",
-    "remote_area_level": "非偏遠",
+    "remote_area_level": "偏遠",
     "count_111": "1119",
     "count_113": "1002",
     "change_rate": "-0.105 ",
@@ -3582,7 +3582,7 @@ export const schoolData = [
   {
     "school_name": "國立金門高中",
     "region": "離島",
-    "remote_area_level": "非偏遠",
+    "remote_area_level": "偏遠",
     "count_111": "939",
     "count_113": "954",
     "change_rate": "0.016 ",
@@ -3592,7 +3592,7 @@ export const schoolData = [
   {
     "school_name": "國立馬祖高中",
     "region": "離島",
-    "remote_area_level": "非偏遠",
+    "remote_area_level": "偏遠",
     "count_111": "265",
     "count_113": "257",
     "change_rate": "-0.030 ",
@@ -3882,7 +3882,7 @@ export const schoolData = [
   {
     "school_name": "國立大湖農工",
     "region": "中部",
-    "remote_area_level": "非偏遠",
+    "remote_area_level": "偏遠",
     "count_111": "598",
     "count_113": "490",
     "change_rate": "-0.181 ",
@@ -4112,7 +4112,7 @@ export const schoolData = [
   {
     "school_name": "國立仁愛高農",
     "region": "中部",
-    "remote_area_level": "非偏遠",
+    "remote_area_level": "極偏",
     "count_111": "186",
     "count_113": "168",
     "change_rate": "-0.097 ",
@@ -4462,7 +4462,7 @@ export const schoolData = [
   {
     "school_name": "國立佳冬高農",
     "region": "南部",
-    "remote_area_level": "非偏遠",
+    "remote_area_level": "偏遠",
     "count_111": "779",
     "count_113": "641",
     "change_rate": "-0.177 ",
@@ -4482,7 +4482,7 @@ export const schoolData = [
   {
     "school_name": "國立恆春工商",
     "region": "南部",
-    "remote_area_level": "非偏遠",
+    "remote_area_level": "特偏",
     "count_111": "592",
     "count_113": "432",
     "change_rate": "-0.270 ",
@@ -4512,7 +4512,7 @@ export const schoolData = [
   {
     "school_name": "國立關山工商",
     "region": "東部",
-    "remote_area_level": "非偏遠",
+    "remote_area_level": "偏遠",
     "count_111": "185",
     "count_113": "181",
     "change_rate": "-0.022 ",
@@ -4532,7 +4532,7 @@ export const schoolData = [
   {
     "school_name": "國立成功商水",
     "region": "東部",
-    "remote_area_level": "非偏遠",
+    "remote_area_level": "特偏",
     "count_111": "130",
     "count_113": "104",
     "change_rate": "-0.200 ",
@@ -4582,7 +4582,7 @@ export const schoolData = [
   {
     "school_name": "國立光復商工",
     "region": "東部",
-    "remote_area_level": "非偏遠",
+    "remote_area_level": "偏遠",
     "count_111": "198",
     "count_113": "169",
     "change_rate": "-0.146 ",
@@ -4602,7 +4602,7 @@ export const schoolData = [
   {
     "school_name": "國立澎湖海事水產",
     "region": "離島",
-    "remote_area_level": "非偏遠",
+    "remote_area_level": "偏遠",
     "count_111": "727",
     "count_113": "556",
     "change_rate": "-0.235 ",
@@ -5062,7 +5062,7 @@ export const schoolData = [
   {
     "school_name": "國立金門農工",
     "region": "離島",
-    "remote_area_level": "非偏遠",
+    "remote_area_level": "偏遠",
     "count_111": "851",
     "count_113": "842",
     "change_rate": "-0.011 ",

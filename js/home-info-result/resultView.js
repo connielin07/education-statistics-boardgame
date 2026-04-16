@@ -115,6 +115,10 @@ function resetLocalGameState() {
   gameState.points = 10;
   gameState.used = 0;
   gameState.allocations = [0, 0, 0];
+  gameState.currentEvent = null;
+  gameState.usedEventIds = [];
+  gameState.eventModalShownRound = null;
+  gameState.isGameActive = false;
   gameState.currentSchools = [];
   gameState.activeCardIndex = 0;
 }
@@ -154,6 +158,7 @@ function bindResultEvents() {
       if (gameRoot) gameRoot.style.display = "block";
       if (resultRoot) resultRoot.style.display = "none";
 
+      gameState.isGameActive = true;
       renderInfoView();
     });
   }

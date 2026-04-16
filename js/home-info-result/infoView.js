@@ -1,4 +1,12 @@
+import { eventData } from "../../data-source/export/eventData.js";
 import { schoolData } from "../../data-source/export/schoolData.js";
+import {
+  addPoint,
+  getAllocationInfo,
+  removePoint,
+  resetAllocation
+} from "../resource-and-score/resourceAction.js";
+import { canFinishRound } from "../resource-and-score/ruleCheck.js";
 import { calculateRoundScore, updateTotalScore } from "../resource-and-score/scoreRule.js";
 import { state } from "../shared/stateStore.js";
 
@@ -11,17 +19,26 @@ export const gameState = {
   allocations: [0, 0, 0],
   eventTitle: "交通不便加劇",
   eventDescription: "特偏或極偏學校若未獲資源，本回合 -2 分。",
+  currentEvent: null,
+  usedEventIds: [],
+  eventModalShownRound: null,
+  isGameActive: false,
   currentSchools: [],
   activeCardIndex: 0,
 };
 
+const REMOTE_AREA_LEVELS = ["偏遠", "特偏", "極偏"];
+const HIGH_REMOTE_AREA_LEVELS = ["特偏", "極偏"];
+
 function getHintText(viewState) {
-  if (viewState.used === 0) {
+  const allocationInfo = getAllocationInfo(viewState.allocations);
+
+  if (allocationInfo.allocated === 0) {
     return "提示：請先分配 3 點資源。";
   }
 
-  if (viewState.used < viewState.maxResource) {
-    return `提示：尚有 ${viewState.maxResource - viewState.used} 點資源未分配完成。`;
+  if (!allocationInfo.isComplete) {
+    return `提示：尚有 ${allocationInfo.remaining} 點資源未分配完成。`;
   }
 
   return "提示：資源已分配完成，可按 FINISH。";
@@ -38,8 +55,111 @@ function formatMedianText(isBelow) {
 }
 
 function getRandomSchools(data, count = 3) {
-  const shuffled = [...data].sort(() => Math.random() - 0.5);
-  return shuffled.slice(0, count);
+  const eventCard = getCurrentEventCard();
+  const selectedSchools = [];
+  const requiredPredicates = getRequiredSchoolPredicates(eventCard);
+
+  addSchoolMatchingAllPredicates(data, selectedSchools, requiredPredicates);
+
+  requiredPredicates.forEach(predicate => {
+    if (selectedSchools.some(predicate.test)) return;
+
+    const candidates = data.filter(school => {
+      return !selectedSchools.includes(school) && predicate.test(school);
+    });
+
+    if (candidates.length === 0) {
+      console.warn(`找不到符合條件的學校卡：${predicate.label}`);
+      return;
+    }
+
+    selectedSchools.push(getRandomItem(candidates));
+  });
+
+  const remainingSchools = shuffle(data.filter(school => {
+    return !selectedSchools.includes(school);
+  }));
+
+  return [...selectedSchools, ...remainingSchools].slice(0, count);
+}
+
+function getRandomItem(items) {
+  const randomIndex = Math.floor(Math.random() * items.length);
+  return items[randomIndex];
+}
+
+function shuffle(items) {
+  return [...items].sort(() => Math.random() - 0.5);
+}
+
+function addSchoolMatchingAllPredicates(data, selectedSchools, requiredPredicates) {
+  if (requiredPredicates.length <= 1) return;
+
+  const candidates = data.filter(school => {
+    return requiredPredicates.every(predicate => predicate.test(school));
+  });
+
+  if (candidates.length > 0) {
+    selectedSchools.push(getRandomItem(candidates));
+  }
+}
+
+function getRequiredSchoolPredicates(eventCard) {
+  const predicates = [
+    {
+      label: "偏遠、特偏或極偏學校",
+      test: school => REMOTE_AREA_LEVELS.includes(school.remote_area_level),
+    }
+  ];
+
+  if (eventCard?.title === "交通不便加劇") {
+    predicates.push({
+      label: "特偏或極偏學校",
+      test: school => HIGH_REMOTE_AREA_LEVELS.includes(school.remote_area_level),
+    });
+  }
+
+  if (eventCard?.title === "教師流動增加") {
+    predicates.push({
+      label: "學生規模變動率低於整體中位的學校",
+      test: school => school.is_below_median === true,
+    });
+  }
+
+  if (eventCard?.title === "地方社區支持活動") {
+    predicates.push({
+      label: "變動率為負值的學校",
+      test: school => Number.parseFloat(school.change_rate) < 0,
+    });
+  }
+
+  return predicates;
+}
+
+function getRandomEvent(data) {
+  if (!Array.isArray(data) || data.length === 0) {
+    return {
+      title: gameState.eventTitle,
+      description: gameState.eventDescription,
+    };
+  }
+
+  const availableEvents = data.filter(eventCard => {
+    return !gameState.usedEventIds.includes(eventCard.id);
+  });
+  const eventPool = availableEvents.length > 0 ? availableEvents : data;
+  const randomIndex = Math.floor(Math.random() * eventPool.length);
+  return eventPool[randomIndex];
+}
+
+function setCurrentEvent(eventCard) {
+  gameState.currentEvent = eventCard;
+  gameState.eventTitle = eventCard.title;
+  gameState.eventDescription = eventCard.description;
+
+  if (eventCard.id && !gameState.usedEventIds.includes(eventCard.id)) {
+    gameState.usedEventIds = [...gameState.usedEventIds, eventCard.id];
+  }
 }
 
 function syncPointsFromSharedState() {
@@ -53,13 +173,13 @@ function syncSharedStateForRound() {
   state.currentRound = gameState.round;
   state.currentSchools = [...gameState.currentSchools];
   state.currentAllocation = [...gameState.allocations];
-  state.currentEvent = {
-    title: gameState.eventTitle,
-    description: gameState.eventDescription,
-  };
+  state.currentEvent = getCurrentEventCard();
 }
 
 function ensureCurrentSchools() {
+  if (!gameState.currentEvent) {
+    setCurrentEvent(getRandomEvent(eventData));
+  }
   if (!Array.isArray(gameState.currentSchools) || gameState.currentSchools.length !== 3) {
     gameState.currentSchools = getRandomSchools(schoolData, 3);
   }
@@ -67,9 +187,17 @@ function ensureCurrentSchools() {
 }
 
 function resetCurrentSchoolsForNextRound() {
+  setCurrentEvent(getRandomEvent(eventData));
   gameState.currentSchools = getRandomSchools(schoolData, 3);
   gameState.activeCardIndex = 0;
   syncSharedStateForRound();
+}
+
+function getCurrentEventCard() {
+  return gameState.currentEvent || {
+    title: gameState.eventTitle,
+    description: gameState.eventDescription,
+  };
 }
 
 function createSchoolCardMarkup(school, index) {
@@ -80,8 +208,10 @@ function createSchoolCardMarkup(school, index) {
         <p>地區：${school.region}</p>
         <p>偏遠級別：${school.remote_area_level}</p>
         <p>規模變動分類：${school.change_category}</p>
-        <p>規模變動率：${formatRate(school.change_rate)}</p>
-        <p>規模變動中位：${formatMedianText(school.is_below_median)}</p>
+        <p>規模變動率 / 中位數：
+        <br/>
+        ${formatRate(school.change_rate)} / -2%
+        </p>
       </div>
     </article>
   `;
@@ -214,8 +344,20 @@ function createGameMarkup(viewState) {
 }
 
 function updateUsedResource() {
-  gameState.used = gameState.allocations.reduce((sum, value) => sum + value, 0);
+  const allocationInfo = getAllocationInfo(gameState.allocations);
+  gameState.used = allocationInfo.allocated;
   state.currentAllocation = [...gameState.allocations];
+  state.allocationStatus = allocationInfo;
+}
+
+function applyAllocationResult(result) {
+  if (!result.success) {
+    return;
+  }
+
+  gameState.allocations = [...result.newAllocation];
+  updateUsedResource();
+  rerenderInfoView();
 }
 
 function rerenderInfoView() {
@@ -232,6 +374,7 @@ function rerenderInfoView() {
   requestAnimationFrame(() => {
     restoreMobileCardPosition();
     syncMobileCounter();
+    openRoundEventModalIfNeeded();
   });
 }
 
@@ -243,31 +386,15 @@ function getButtonTargetIndex(button) {
 }
 
 function increaseResource(index) {
-  updateUsedResource();
-
-  if (gameState.used >= gameState.maxResource) {
-    return;
-  }
-
-  gameState.allocations[index] += 1;
-  state.currentAllocation = [...gameState.allocations];
-  rerenderInfoView();
+  applyAllocationResult(addPoint(gameState.allocations, index));
 }
 
 function decreaseResource(index) {
-  if (gameState.allocations[index] <= 0) {
-    return;
-  }
-
-  gameState.allocations[index] -= 1;
-  state.currentAllocation = [...gameState.allocations];
-  rerenderInfoView();
+  applyAllocationResult(removePoint(gameState.allocations, index));
 }
 
 function resetResources() {
-  gameState.allocations = [0, 0, 0];
-  state.currentAllocation = [0, 0, 0];
-  rerenderInfoView();
+  applyAllocationResult(resetAllocation(gameState.allocations));
 }
 
 function openEventModal() {
@@ -282,6 +409,17 @@ function closeEventModal() {
   modal.hidden = true;
 }
 
+function openRoundEventModalIfNeeded() {
+  if (!gameState.isGameActive) return;
+  if (gameState.eventModalShownRound === gameState.round) return;
+
+  const root = document.querySelector("#game-screen-root");
+  if (root && root.style.display === "none") return;
+
+  openEventModal();
+  gameState.eventModalShownRound = gameState.round;
+}
+
 function goToResultScreen() {
   document.dispatchEvent(new CustomEvent("game:go-result"));
 }
@@ -289,8 +427,15 @@ function goToResultScreen() {
 function handleFinish() {
   updateUsedResource();
 
-  if (gameState.used !== gameState.maxResource) {
-    alert("請先剛好分配完 3 點資源。");
+  const eventCard = getCurrentEventCard();
+  const validation = canFinishRound(
+    gameState.currentSchools,
+    gameState.allocations,
+    eventCard
+  );
+
+  if (!validation.valid) {
+    alert(validation.errors?.[0] || "目前無法完成回合。");
     return;
   }
 
@@ -299,10 +444,7 @@ function handleFinish() {
   const roundScore = calculateRoundScore(
     gameState.currentSchools,
     gameState.allocations,
-    {
-      title: gameState.eventTitle,
-      description: gameState.eventDescription,
-    }
+    eventCard
   );
 
   state.roundScore = roundScore;
@@ -319,9 +461,9 @@ function handleFinish() {
   if (gameState.round < gameState.totalRounds) {
     gameState.round += 1;
     state.currentRound = gameState.round;
-    gameState.allocations = [0, 0, 0];
-    state.currentAllocation = [0, 0, 0];
-    gameState.used = 0;
+    const resetResult = resetAllocation(gameState.allocations);
+    gameState.allocations = [...resetResult.newAllocation];
+    updateUsedResource();
 
     resetCurrentSchoolsForNextRound();
     rerenderInfoView();
