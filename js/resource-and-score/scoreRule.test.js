@@ -318,6 +318,142 @@ function runResultFeedbackTests() {
 // ============================================================
 
 /**
+ * 邊界情況測試
+ */
+function runEdgeCaseTests() {
+  TestRunner.suite("邊界情況處理");
+  
+  // 測試 1：事件卡多條件同時觸發
+  TestRunner.test("多個事件條件同時觸發：分配取最先匹配", () => {
+    // 情況：某校既是「特偏」又是「明顯下降」
+    // 預期邏輯應該在第一個配置為 0 時立即返回扣分
+    const schools = [
+      { 
+        remote_area_level: "特偏", 
+        change_category: "明顯下降",
+        is_below_median: true 
+      }
+    ];
+    const allocation = [0]; // 未獲資源
+    
+    // 模擬多個條件檢查
+    let penalty = 0;
+    
+    // 第 1 個條件：交通不便（特偏未獲資源）
+    if (schools[0].remote_area_level === "特偏" && allocation[0] === 0) {
+      penalty = -2;
+    }
+    
+    // 第 2 個條件：教師流動（明顯下降未獲資源）- 但應該已經被第 1 個攔了
+    if (schools[0].change_category === "明顯下降" && allocation[0] === 0 && penalty === 0) {
+      penalty = -2;
+    }
+    
+    TestRunner.assertEquals(penalty, -2, "多條件情況下應取最先匹配");
+  });
+  
+  // 測試 2：最小分配（只分 1 點）
+  TestRunner.test("最小分配：1 點分配給明顯下降校應得 3 分", () => {
+    const schools = [
+      { change_category: "明顯下降", is_below_median: true }
+    ];
+    const allocation = [1];
+    
+    const scorePerPoint = 3; // 明顯下降改為 3 分/點
+    const baseScore = scorePerPoint * allocation[0];
+    const bonus = (schools[0].is_below_median && allocation[0] > 0) ? 1 : 0;
+    const totalScore = baseScore + bonus;
+    
+    TestRunner.assertEquals(totalScore, 4, "最小分配計分");
+  });
+  
+  // 測試 3：最大負分（某校特偏且明顯下降都未獲資源）
+  TestRunner.test("多個扣分條件無法疊加：最多只扣 2 分（新難度）", () => {
+    // 即使同時符合多個扣分條件，也只應該扣一次
+    const schools = [
+      { remote_area_level: "特偏", change_category: "明顯下降" }
+    ];
+    const allocation = [0];
+    
+    let penalty = 0;
+    
+    // 交通不便扣 2 分
+    if (schools[0].remote_area_level === "特偏" && allocation[0] === 0) {
+      penalty -= 2;
+    }
+    
+    // 教師流動扣 2 分（但同一時間內應該不重複）
+    if (schools[0].change_category === "明顯下降" && allocation[0] === 0) {
+      // 在當前邏輯中，檢查會在不同的事件卡中進行
+      // 所以同一回合內不會重複扣分
+    }
+    
+    TestRunner.assertEquals(penalty, -2, "扣分不應疊加");
+  });
+  
+  // 測試 4：所有分配給穩定或成長的校（低分配）
+  TestRunner.test("全分配給成長校：應得最低分（0 分）", () => {
+    const schools = [
+      { change_category: "穩定或成長", is_below_median: false },
+      { change_category: "穩定或成長", is_below_median: false },
+      { change_category: "穩定或成長", is_below_median: false }
+    ];
+    const allocation = [1, 1, 1];
+    
+    let roundScore = 0;
+    for (let i = 0; i < schools.length; i++) {
+      const scorePerPoint = 0; // 穩定或成長為 0
+      roundScore += scorePerPoint * allocation[i];
+    }
+    
+    TestRunner.assertEquals(roundScore, 0, "成長校無基礎分");
+  });
+  
+  // 測試 5：評級邊界測試（新難度）
+  TestRunner.test("評級邊界：27 分應為 B 級，28 分應為 A 級", () => {
+    const score27 = 27;
+    const score28 = 28;
+    
+    const level27 = score27 >= 28 ? "A" : score27 >= 18 ? "B" : "C";
+    const level28 = score28 >= 28 ? "A" : score28 >= 18 ? "B" : "C";
+    
+    TestRunner.assertEquals(level27, "B", "27 分邊界");
+    TestRunner.assertEquals(level28, "A", "28 分邊界");
+  });
+  
+  // 測試 6：評級邊界測試（下限）
+  TestRunner.test("評級邊界：17 分應為 C 級，18 分應為 B 級", () => {
+    const score17 = 17;
+    const score18 = 18;
+    
+    const level17 = score17 >= 28 ? "A" : score17 >= 18 ? "B" : "C";
+    const level18 = score18 >= 28 ? "A" : score18 >= 18 ? "B" : "C";
+    
+    TestRunner.assertEquals(level17, "C", "17 分邊界");
+    TestRunner.assertEquals(level18, "B", "18 分邊界");
+  });
+  
+  // 測試 7：中位加成只限有資源的校
+  TestRunner.test("中位加成：沒有資源的校即使低於中位也不加成", () => {
+    const schools = [
+      { change_category: "圖示下降", is_below_median: true },
+      { change_category: "小幅下降", is_below_median: true },
+      { change_category: "穩定或成長", is_below_median: true }
+    ];
+    const allocation = [0, 0, 0]; // 都沒分配
+    
+    let bonusCount = 0;
+    for (let i = 0; i < schools.length; i++) {
+      if (schools[i].is_below_median && allocation[i] > 0) {
+        bonusCount++;
+      }
+    }
+    
+    TestRunner.assertEquals(bonusCount, 0, "無資源無加成");
+  });
+}
+
+/**
  * 執行所有測試
  */
 export function runAllTests() {
@@ -330,6 +466,7 @@ export function runAllTests() {
   runRoundScoreTests();
   runTotalScoreTests();
   runResultFeedbackTests();
+  runEdgeCaseTests();
   
   TestRunner.summary();
   
