@@ -37,7 +37,7 @@
  */
 export function getBaseScorePerPoint(classification) {
   const scoreMap = {
-    "明顯下降": 3,
+    "明顯下降": 2,
     "小幅下降": 1,
     "穩定或成長": 0
   };

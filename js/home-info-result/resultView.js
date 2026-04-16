@@ -2,14 +2,14 @@ import { renderInfoView, gameState } from "./infoView.js";
 import { state } from "../shared/stateStore.js";
 
 function getGrade(score) {
-  if (score >= 20) return "A";
-  if (score >= 15) return "B";
+  if (score >= 28) return "A";
+  if (score >= 18) return "B";
   return "C";
 }
 
 function getComment(score) {
-  if (score >= 20) return "資源調度成效良好";
-  if (score >= 15) return "整體校務支持大致穩定";
+  if (score >= 28) return "資源調度成效良好";
+  if (score >= 18) return "整體校務支持大致穩定";
   return "資源配置仍有改善空間";
 }
 
